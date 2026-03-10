@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <link rel="stylesheet" href="style.css">
+    <title>MESTRE</title>
+</head>
+<body>
+
+    <!-- Cursor personalitzat -->
+    <div class="custom-cursor" id="cursor"></div>
+    <div class="custom-cursor-ring" id="cursor-ring"></div>
+
+    <!-- Botons xarxes socials -->
+    <div class="social-links">
+        <a href="https://www.instagram.com/el_mestre_2.0/" target="_blank" class="social-btn" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <circle cx="12" cy="12" r="4"/>
+                <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span>Instagram</span>
+        </a>
+        <a href="https://x.com/Casals5Casals" target="_blank" class="social-btn" aria-label="Twitter / X">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            <span>Twitter</span>
+        </a>
+    </div>
+
+    <!-- Secció principal, presentació per l'scroll -->
+    <div class="foto-principal">
+        <h1>MESTRE</h1>
+        <div class="scroll-indicator">
+            <p>scroll</p>
+            <span></span>
+        </div>
+    </div>
+
+    <!-- Secció Maquiavelo -->
+    <div class="maquiavelo-container">
+        <div class="maquiavelo-content">
+            <h2 class="reveal">
+                Pocs veuen el que som, però tothom veu el que aparentem - Nicolás Maquiavelo -
+            </h2>
+            <div class="maquiavelo-text-image">
+                <div class="text-container reveal">
+                    <p>
+                        "Pocs veuen el que som, però tothom veu el que aparentem." No és una frase bonica: és una condemna. 
+                        Una veritat brutal que portem escrita a la pell des del dia que vam deixar que les pantalles fossin 
+                        els nostres miralls i que els "likes" substituïssin l'autoestima.
+
+                        Vivim en un món on ja no cal que ningú ens controli; ens controlem nosaltres mateixos. Ens domestiquem 
+                        comprant, consumint, mostrant. Ens van dir que érem lliures, però ens van entrenar per ser clients. 
+                        I el més trist és que ho hem acceptat amb un somriure i un filtre de moda.
+
+                        Les xarxes socials… aquest gran temple on la gent resa a si mateixa. Un escenari on tothom pot ser déu, 
+                        profeta o víctima segons l'algoritme del dia. Tothom vol ser admirat, però ningú vol ser autèntic. 
+                        Perquè l'autenticitat no ven. L'autenticitat no genera engagement. L'autenticitat no paga anuncis.
+
+                        Comprem roba que no necessitem per impressionar gent que ni tan sols ens importa. Ens endeutem per un tros 
+                        de plàstic brillant que d'aquí sis mesos serà "antic". Estem envoltats d'objectes creats per trencar-se 
+                        ràpid, igual que les nostres identitats. Tot temporal. Tot reemplaçable. Fins i tot nosaltres.
+
+                        Ens han convençut que la felicitat és a la propera compra, a la propera moda, al proper llançament. 
+                        Però la felicitat no arriba mai. Sempre falta alguna cosa. Sempre som "insuficients" fins que paguem. 
+                        I quan paguem… tornem a ser insuficients. El sistema és perfecte perquè és simple: si et sents buit, 
+                        consumeixes. I per això et buiden.
+
+                        El món modern és un aparador immens on tots actuem. I el pitjor és que ho sabem. Sabem que som part 
+                        de l'espectacle, però continuem aplaudint mentre ens arrosseguen a l'escenari. Perquè fa por descobrir 
+                        qui ets de veritat quan ningú no et mira.
+
+                        Al final, Maquiavel tenia raó: Pocs veuen el que som, però tothom veu el que aparentem. La diferència 
+                        és que avui, allò que aparentem no ho decidim nosaltres: ho decideix un algoritme, una tendència, 
+                        una marca. I quan te n'adones, ja ets un altre producte a la prestatgeria.
+                    </p>
+                </div>
+                <div class="image-container reveal">
+                    <img src="assets/imgs/vendetta.webp" alt="Máscaras" class="mascaras">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección artícles am Swiper -->
+    <section class="section-articles">
+        <div class="section-header reveal">
+            <h2>Reflexions Contemporànies</h2>
+            <p>Anàlisis de la condició humana a través de l'art i la cultura</p>
+        </div>
+        
+        <!-- Contenidor del Swiper -->
+        <div class="swiper articles-swiper">
+            <div class="swiper-wrapper">
+                
+                <div class="swiper-slide">
+                    <article class="article-card">
+                        <div class="article-image">
+                            <img src="assets/imgs/Stańczyk.jpg" alt="Pagliacci i Stańczyk">
+                        </div>
+                        <div class="article-content">
+                            <h3>Pagliacci i Stańczyk: els pallassos que riuen mentre el món s'enfonsa</h3>
+                            <p>Pagliacci i Stańczyk revelen la tragèdia dels que fan riure: un dolor invisible que la societat ignora. Mostren com el món prefereix l'espectacle a la veritat, ignorant el desastre i el sofriment.</p>
+                            <a href="stanczyk.html" class="read-more">Llegir més</a>
+                        </div>
+                    </article>
+                </div>
+                
+                <div class="swiper-slide">
+                    <article class="article-card">
+                        <div class="article-image">
+                            <img src="assets/imgs/devilman.jpg" alt="Devilman Crybaby">
+                        </div>
+                        <div class="article-content">
+                            <h3>El caos revela l'ésser humà: odi, por i espectacle</h3>
+                            <p>Devilman Crybaby mostra que quan el caos domina, l'ésser humà revela el seu pitjor: odi, violència i gaudi del sofriment aliè. La societat no busca raó ni empatia, només espectacle i supervivència a costa dels altres.</p>
+                            <a href="devilman.html" class="read-more">Llegir més</a>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="swiper-slide">
+                    <article class="article-card">
+                        <div class="article-image">
+                            <img src="assets/imgs/mrrobot.jpg" alt="Mr Robot">
+                        </div>
+                        <div class="article-content">
+                            <h3>2026: El fracàs en alta definició</h3>
+                            <p>El 2026 no és futur, és la nostra pròpia destrucció en directe. Polítics corruptes, tecnòcrates depredadors, IA que controla la teva vida i un món que celebra la mentida mentre els poderosos abusen sense conseqüències.</p>
+                            <a href="mrrobot.html" class="read-more">Llegir més</a>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="swiper-slide">
+                    <article class="article-card">
+                        <div class="article-image">
+                            <img src="assets/imgs/gantz2.jpg" alt="Gantz">
+                        </div>
+                        <div class="article-content">
+                            <h3>Gantz: La crueltat com a espectacle de masses</h3>
+                            <p>En el món de Gantz, la violència es converteix en entreteniment i la mort en moneda de canvi. Una reflexió sobre com la societat moderna consumeix el sofriment aliè mentre ignora la seva pròpia humanitat.</p>
+                            <a href="gantz.html" class="read-more">Llegir més</a>
+                        </div>
+                    </article>
+                </div>
+                
+            </div>
+            
+            <!-- Botons swiper -->
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            
+            <!-- paginació swipper -->
+            <div class="swiper-pagination"></div>
+        </div>
+    </section>
+
+    <!-- Script del Swiper -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        // ── Cursor personalitzat ──
+        const cursor = document.getElementById('cursor');
+        const ring = document.getElementById('cursor-ring');
+        let ringX = 0, ringY = 0, curX = 0, curY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            curX = e.clientX; curY = e.clientY;
+            cursor.style.left = curX + 'px';
+            cursor.style.top  = curY + 'px';
+        });
+
+        function animateRing() {
+            ringX += (curX - ringX) * 0.12;
+            ringY += (curY - ringY) * 0.12;
+            ring.style.left = ringX + 'px';
+            ring.style.top  = ringY + 'px';
+            requestAnimationFrame(animateRing);
+        }
+        animateRing();
+
+        // Hover sobre links i botons
+        document.querySelectorAll('a, button, .swiper-button-next, .swiper-button-prev').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.classList.add('hovered');
+                ring.classList.add('hovered');
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.classList.remove('hovered');
+                ring.classList.remove('hovered');
+            });
+        });
+
+        // ── Scroll Reveal ──
+        const revealEls = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, i * 100);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        revealEls.forEach(el => observer.observe(el));
+
+        // ── Swiper ──
+        document.addEventListener('DOMContentLoaded', function() {
+            const swiper = new Swiper('.articles-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: true,
+                effect: 'slide',
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                breakpoints: {
+                    640:  { slidesPerView: 1, spaceBetween: 20 },
+                    768:  { slidesPerView: 2, spaceBetween: 30 },
+                    1024: { slidesPerView: 3, spaceBetween: 40 },
+                },
+                speed: 400,
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSOCIETY — EL SISTEMA MENTEIX</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+        :root {
+            --red: #ff2222;
+            --green: #00ff41;
+            --bg: #050505;
+            --bg2: #0a0a0a;
+            --text: #c8c8c8;
+            --text-dim: #555;
+            --white: #efefef;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: linear-gradient(to bottom, rgba(5,5,5,0.95), transparent);
+            border-bottom: 1px solid rgba(255,34,34,0.1);
+        }
+
+        .nav-logo {
+            font-family: 'VT323', monospace;
+            font-size: 1.6rem;
+            color: var(--red);
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px var(--red);
+            animation: flicker 4s infinite;
+        }
+
+        .nav-links { display: flex; gap: 40px; list-style: none; }
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transition: color 0.2s, text-shadow 0.2s;
+        }
+        .nav-links a:hover { color: var(--green); text-shadow: 0 0 10px var(--green); }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 120px 40px 80px;
+            overflow: hidden;
+        }
+
+        .hero-bg-lines {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(90deg, rgba(255,34,34,0.04) 1px, transparent 1px),
+                linear-gradient(0deg, rgba(255,34,34,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: grid-drift 20s linear infinite;
+        }
+
+        @keyframes grid-drift { from { transform: translateY(0); } to { transform: translateY(60px); } }
+
+        .hero-eyebrow {
+            font-size: 0.7rem;
+            letter-spacing: 8px;
+            color: var(--green);
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            opacity: 0;
+            animation: reveal 0.8s ease 0.3s forwards;
+            text-shadow: 0 0 15px var(--green);
+        }
+
+        .hero-title {
+            font-family: 'VT323', monospace;
+            font-size: clamp(5rem, 15vw, 14rem);
+            line-height: 0.85;
+            text-align: center;
+            color: var(--white);
+            position: relative;
+            z-index: 1;
+            opacity: 0;
+            animation: reveal 1s ease 0.6s forwards;
+        }
+
+        .hero-title span {
+            display: block;
+            color: var(--red);
+            text-shadow: 0 0 40px rgba(255,34,34,0.5), 3px 3px 0 rgba(0,255,65,0.15);
+            animation: glitch 6s infinite;
+        }
+
+        .hero-subtitle {
+            margin-top: 40px;
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            color: var(--text-dim);
+            text-align: center;
+            max-width: 560px;
+            line-height: 1.8;
+            letter-spacing: 1px;
+            opacity: 0;
+            animation: reveal 1s ease 1s forwards;
+            border-left: 2px solid var(--red);
+            border-right: 2px solid var(--red);
+            padding: 20px 30px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px; left: 50%;
+            transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            opacity: 0;
+            animation: reveal 1s ease 1.5s forwards;
+        }
+        .scroll-indicator span { font-size: 0.6rem; letter-spacing: 4px; color: var(--text-dim); text-transform: uppercase; }
+        .scroll-line { width: 1px; height: 60px; background: linear-gradient(to bottom, var(--red), transparent); animation: scroll-pulse 2s ease infinite; }
+        @keyframes scroll-pulse { 0%, 100% { opacity: 0.3; height: 40px; } 50% { opacity: 1; height: 60px; } }
+
+        .video-section {
+            padding: 100px 40px;
+            background: var(--bg2);
+            position: relative;
+        }
+
+        .video-section::before {
+            content: 'TRANSMISSIÓ';
+            position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+            font-size: 0.65rem; letter-spacing: 10px; color: var(--text-dim); text-transform: uppercase;
+        }
+
+        .video-wrapper { max-width: 1000px; margin: 0 auto; }
+
+        .video-frame {
+            position: relative;
+            border: 1px solid rgba(255,34,34,0.3);
+            box-shadow: 0 0 0 1px rgba(0,255,65,0.05), 0 0 60px rgba(255,34,34,0.1);
+            overflow: hidden;
+            background: #000;
+        }
+
+        .video-frame::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,34,34,0.05) 0%, transparent 50%, rgba(0,255,65,0.03) 100%);
+            pointer-events: none; z-index: 2;
+        }
+
+        .video-hud-corner { position: absolute; width: 20px; height: 20px; z-index: 3; }
+        .video-hud-corner.tl { top: 12px; left: 12px; border-top: 2px solid var(--red); border-left: 2px solid var(--red); }
+        .video-hud-corner.tr { top: 12px; right: 12px; border-top: 2px solid var(--red); border-right: 2px solid var(--red); }
+        .video-hud-corner.bl { bottom: 12px; left: 12px; border-bottom: 2px solid var(--red); border-left: 2px solid var(--red); }
+        .video-hud-corner.br { bottom: 12px; right: 12px; border-bottom: 2px solid var(--red); border-right: 2px solid var(--red); }
+
+        .video-hud-label { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); font-size: 0.55rem; letter-spacing: 6px; color: var(--red); z-index: 3; text-transform: uppercase; opacity: 0.7; }
+
+        .rec-dot { position: absolute; top: 16px; right: 50px; z-index: 3; display: flex; align-items: center; gap: 6px; font-size: 0.55rem; letter-spacing: 2px; color: var(--red); }
+        .rec-dot::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); animation: rec-blink 1.5s ease infinite; }
+        @keyframes rec-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.1; } }
+
+        video { width: 100%; display: block; }
+
+        .video-title-block {
+            max-width: 1000px; margin: 0 auto; padding-top: 50px;
+            display: grid; grid-template-columns: auto 1fr; gap: 30px; align-items: start;
+        }
+
+        .video-number { font-family: 'VT323', monospace; font-size: 6rem; line-height: 1; color: rgba(255,34,34,0.15); padding-top: 6px; }
+
+        .video-title-text h2 {
+            font-family: 'VT323', monospace;
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            color: var(--white); line-height: 0.95; letter-spacing: 2px; margin-bottom: 20px;
+            animation: glitch 8s infinite 2s;
+        }
+        .video-title-text h2 em { color: var(--red); font-style: normal; text-shadow: 0 0 20px rgba(255,34,34,0.4); }
+
+        .video-description {
+            color: var(--text-dim); font-family: 'Courier Prime', monospace; font-size: 1rem; line-height: 1.9;
+            max-width: 600px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 20px; margin-bottom: 30px;
+        }
+        .video-description strong { color: var(--text); }
+
+        .video-meta { display: flex; gap: 30px; flex-wrap: wrap; }
+        .meta-item { display: flex; flex-direction: column; gap: 4px; }
+        .meta-label { font-size: 0.6rem; letter-spacing: 4px; color: var(--text-dim); text-transform: uppercase; }
+        .meta-value { font-size: 0.85rem; color: var(--green); text-shadow: 0 0 8px rgba(0,255,65,0.3); }
+
+        .divider { max-width: 1000px; margin: 0 auto; height: 1px; background: linear-gradient(to right, transparent, rgba(255,34,34,0.3), transparent); }
+
+        /* MANIFEST */
+        .manifest-section {
+            padding: 100px 40px;
+            background: var(--bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .manifest-bg-text {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'VT323', monospace;
+            font-size: 25vw;
+            color: rgba(255,34,34,0.025);
+            white-space: nowrap;
+            pointer-events: none; user-select: none; letter-spacing: -5px;
+        }
+
+        .manifest-wrapper { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
+
+        .manifest-header { margin-bottom: 70px; }
+
+        .manifest-tag {
+            display: block; font-size: 0.65rem; letter-spacing: 8px; color: var(--green);
+            text-transform: uppercase; margin-bottom: 20px; text-shadow: 0 0 10px rgba(0,255,65,0.3);
+        }
+
+        .manifest-title {
+            font-family: 'VT323', monospace;
+            font-size: clamp(3.5rem, 8vw, 7rem);
+            color: var(--white); line-height: 0.9; letter-spacing: 3px;
+        }
+
+        .manifest-title em { color: var(--red); font-style: normal; text-shadow: 0 0 30px rgba(255,34,34,0.4); animation: glitch 7s infinite 1s; }
+
+        .manifest-body { display: flex; flex-direction: column; }
+
+        .manifest-paragraph {
+            display: grid; grid-template-columns: 60px 1fr; gap: 30px; align-items: start;
+            padding: 40px 0 40px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .manifest-paragraph::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 2px; background: transparent; transition: background 0.3s;
+        }
+
+        .manifest-paragraph:hover { background: rgba(255,34,34,0.02); }
+        .manifest-paragraph:hover::before { background: var(--red); }
+        .manifest-paragraph:hover .par-number { color: var(--red); text-shadow: 0 0 15px rgba(255,34,34,0.5); }
+        .manifest-paragraph:first-child { padding-top: 0; }
+        .manifest-paragraph:last-child { border-bottom: none; }
+
+        .par-number {
+            font-family: 'VT323', monospace; font-size: 2.5rem;
+            color: rgba(255,34,34,0.2); line-height: 1.4;
+            transition: color 0.3s, text-shadow 0.3s; user-select: none;
+        }
+
+        .manifest-paragraph p {
+            font-family: 'Courier Prime', monospace;
+            font-size: clamp(1rem, 1.3vw, 1.15rem);
+            line-height: 2;
+            color: var(--text-dim);
+            text-align: justify;
+        }
+
+        .manifest-paragraph p strong { color: var(--white); }
+        .manifest-paragraph p em { color: var(--red); font-style: italic; }
+
+        .manifest-final {
+            margin-top: 20px;
+            padding: 50px 30px !important;
+            background: rgba(255,34,34,0.04) !important;
+            border: 1px solid rgba(255,34,34,0.15) !important;
+            border-radius: 2px;
+        }
+
+        .manifest-final p { font-size: clamp(1.1rem, 1.5vw, 1.3rem) !important; color: var(--text) !important; }
+        .manifest-final .par-number { color: rgba(255,34,34,0.4) !important; }
+
+        /* TERMINAL */
+        .terminal-section { padding: 80px 40px; background: var(--bg2); }
+
+        .terminal {
+            max-width: 800px; margin: 0 auto;
+            background: #0a0a0a; border: 1px solid rgba(0,255,65,0.2);
+            border-radius: 4px; overflow: hidden; box-shadow: 0 0 40px rgba(0,255,65,0.05);
+        }
+
+        .terminal-bar { background: #111; padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(0,255,65,0.1); }
+        .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .t-dot.red { background: #ff5f56; } .t-dot.yellow { background: #ffbd2e; } .t-dot.green { background: #27c93f; }
+        .terminal-title { margin: 0 auto; font-size: 0.65rem; color: var(--text-dim); letter-spacing: 3px; }
+
+        .terminal-body { padding: 30px; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; line-height: 2; color: var(--green); }
+        .t-line { display: flex; gap: 12px; }
+        .t-prompt { color: var(--red); }
+        .t-cmd { color: var(--white); }
+        .t-output { color: var(--text-dim); padding-left: 24px; }
+        .t-output.highlight { color: var(--green); }
+
+        .cursor { display: inline-block; width: 8px; height: 14px; background: var(--green); animation: cursor-blink 1s step-end infinite; vertical-align: middle; }
+        @keyframes cursor-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* CTA */
+        .cta-section { padding: 120px 40px; text-align: center; position: relative; overflow: hidden; }
+
+        .cta-section::before {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(255,34,34,0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta-label { font-size: 0.65rem; letter-spacing: 8px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 20px; }
+
+        .cta-title { font-family: 'VT323', monospace; font-size: clamp(3rem, 8vw, 7rem); color: var(--white); line-height: 0.9; margin-bottom: 50px; }
+        .cta-title span { color: var(--red); text-shadow: 0 0 30px rgba(255,34,34,0.4); }
+
+        .cta-btn {
+            display: inline-block; padding: 16px 50px; background: transparent;
+            border: 1px solid var(--red); color: var(--red);
+            font-family: 'Share Tech Mono', monospace; font-size: 0.85rem;
+            letter-spacing: 4px; text-transform: uppercase; text-decoration: none;
+            position: relative; overflow: hidden; transition: color 0.3s; cursor: crosshair;
+        }
+        .cta-btn::before { content: ''; position: absolute; inset: 0; background: var(--red); transform: translateX(-100%); transition: transform 0.3s ease; }
+        .cta-btn:hover { color: var(--bg); }
+        .cta-btn:hover::before { transform: translateX(0); }
+        .cta-btn span { position: relative; z-index: 1; }
+
+        footer {
+            padding: 40px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 16px;
+        }
+        .footer-logo { font-family: 'VT323', monospace; font-size: 1.4rem; color: var(--red); letter-spacing: 4px; text-shadow: 0 0 15px rgba(255,34,34,0.4); }
+        .footer-text { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 2px; }
+
+        @keyframes reveal { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes flicker { 0%, 95%, 100% { opacity: 1; } 96% { opacity: 0.4; } 97% { opacity: 1; } 98% { opacity: 0.2; } 99% { opacity: 1; } }
+        @keyframes glitch {
+            0%, 90%, 100% { text-shadow: 0 0 40px rgba(255,34,34,0.5), 3px 3px 0 rgba(0,255,65,0.15); transform: none; }
+            91% { text-shadow: -3px 0 var(--green), 3px 0 var(--red); transform: skewX(-2deg); }
+            92% { text-shadow: 3px 0 var(--green), -3px 0 var(--red); transform: skewX(2deg); }
+            93% { text-shadow: 0 0 40px rgba(255,34,34,0.5); transform: none; }
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 16px 20px; }
+            .nav-links { display: none; }
+            .hero, .video-section, .manifest-section, .terminal-section, .cta-section { padding: 80px 20px; }
+            .video-title-block { grid-template-columns: 1fr; }
+            .video-number { font-size: 3rem; }
+            .manifest-paragraph { grid-template-columns: 40px 1fr; gap: 16px; }
+            .par-number { font-size: 1.8rem; }
+            footer { flex-direction: column; text-align: center; padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo">FSOCIETY</div>
+        <ul class="nav-links">
+            <li><a href="#">Manifest</a></li>
+            <li><a href="#">Transmissions</a></li>
+            <li><a href="#">Uneix-te</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-bg-lines"></div>
+        <p class="hero-eyebrow">// ALERTA DE SISTEMA — EMISSIÓ INICIADA</p>
+        <h1 class="hero-title">
+            EL<br>
+            <span>SISTEMA</span><br>
+            MENTEIX
+        </h1>
+        <p class="hero-subtitle">
+            Vivim encadenats a una il·lusió construïda per l'1%.<br>
+            Els diners no són reals. El deute no és real.<br>
+            <strong style="color: var(--white);">Però el control sí ho és.</strong>
+        </p>
+        <div class="scroll-indicator">
+            <span>Desplaça</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <section class="video-section">
+        <div class="video-wrapper">
+            <div class="video-frame">
+                <div class="video-hud-corner tl"></div>
+                <div class="video-hud-corner tr"></div>
+                <div class="video-hud-corner bl"></div>
+                <div class="video-hud-corner br"></div>
+                <div class="video-hud-label">TRANSMISSIÓ XIFRADA — CANAL 0</div>
+                <div class="rec-dot">REC</div>
+                <video controls preload="metadata">
+                    <source src="mrrobot.mp4" type="video/mp4">
+                    El teu navegador no suporta l'element de vídeo.
+                </video>
+            </div>
+        </div>
+
+        <div class="video-title-block">
+            <div class="video-number">01</div>
+            <div class="video-title-text">
+                <h2>DESPERTA,<br><em>ESCLAU.</em></h2>
+                <p class="video-description">
+                    <strong>El món que coneixes és un virus.</strong> Les corporacions que financen els teus somnis també financen la teva gàbia. Cada click, cada compra, cada cerca alimenta una màquina dissenyada per mantenir-te adormit, endeutat i controlat.<br><br>
+
+                </p>
+                <div class="video-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Durada</span>
+                        <span class="meta-value">23:47</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Xifrat</span>
+                        <span class="meta-value">AES-256</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Origen</span>
+                        <span class="meta-value">DESCONEGUT</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Estat</span>
+                        <span class="meta-value" style="color: var(--red);">EN DIRECTE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="manifest-section">
+        <div class="manifest-bg-text">VERITAT</div>
+        <div class="manifest-wrapper">
+            <div class="manifest-header">
+                <span class="manifest-tag">// DOCUMENT CLASSIFICAT — NIVELL OMEGA</span>
+                <h2 class="manifest-title">EL <em>MANIFEST</em></h2>
+            </div>
+
+            <div class="manifest-body">
+                <div class="manifest-paragraph">
+                    <span class="par-number">01</span>
+                    <p>Escolta, <strong>el món ja no és una farsa: és un virus.</strong> Epstein no va morir; només va traslladar el seu negoci a l'ombra. L'illa, els avions, els polítics —demòcrates, republicans, tots— allà, riient, tocant nens, sense que ningú faci res. I tu, amb el mòbil a la mà, et creus lliure perquè votes cada quatre anys.</p>
+                </div>
+
+                <div class="manifest-paragraph">
+                    <span class="par-number">02</span>
+                    <p>Els tecnòcrates? <strong>Bezos, Musk, Zuckerberg…</strong> no són visionaris, són depredadors amb cotxe elèctric i IA que decideix qui viu, qui treballa, qui té diners. Ens venen paradisos digitals mentre ens exploten, ens observen, ens manipulen. Cada click teu és un vot per a la seva dictadura invisible. Cada like és còmplice. Cada compra, <em>traïció.</em></p>
+                </div>
+
+                <div class="manifest-paragraph">
+                    <span class="par-number">03</span>
+                    <p>La tecnologia <strong>no ens allibera, ens sedueix, ens enganya.</strong> Les IA no són intel·ligents, només amplifiquen la nostra cobdícia, la nostra estupidesa. Els governs totalitaris disfressats de democràcia juguen amb nosaltres com marionetes, mentre les xarxes socials ens fan creure que som importants, que tenim connexió, que importem. <em>No importes. Mai ho has fet.</em></p>
+                </div>
+
+                <div class="manifest-paragraph">
+                    <span class="par-number">04</span>
+                    <p>I sabem que som covards. <strong>Ho sabem.</strong> Preferim anestesiar-nos amb streaming, amb videojocs, amb la darrera app, abans que mirar de cara la realitat: el món està podrit i nosaltres som part del podriment. Cada silenci teu, cada click, cada euro gastat, és un cop de martell en el cervell de la humanitat.</p>
+                </div>
+
+                <div class="manifest-paragraph manifest-final">
+                    <span class="par-number">05</span>
+                    <p><strong>El 2026 no és futur: és el nostre fracàs en alta definició.</strong> I nosaltres… som feliços mirant la pantalla.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="terminal-section">
+        <div class="terminal">
+            <div class="terminal-bar">
+                <div class="t-dot red"></div>
+                <div class="t-dot yellow"></div>
+                <div class="t-dot green"></div>
+                <span class="terminal-title">fsociety@anon — bash — 80×24</span>
+            </div>
+            <div class="terminal-body">
+                <div class="t-line">
+                    <span class="t-prompt">root@fsociety:~$</span>
+                    <span class="t-cmd">./reality_check.sh --full-scan</span>
+                </div>
+                <div class="t-output">[*] Iniciant anàlisi del sistema...</div>
+                <div class="t-output">[*] Escanejant estructures de poder...</div>
+                <div class="t-output highlight">[!] ALERTA: 70% de la riquesa global en mans de l'1%</div>
+                <div class="t-output highlight">[!] ALERTA: Vigilància massiva detectada — 5.2B dispositius</div>
+                <div class="t-output">[*] Processant dades corporatives...</div>
+                <div class="t-output highlight">[!] CRÍTIC: El deute és la cadena més efectiva mai dissenyada</div>
+                <div class="t-output">[*] Anàlisi completada. Benvingut a la realitat.</div>
+                <br>
+                <div class="t-line">
+                    <span class="t-prompt">root@fsociety:~$</span>
+                    <span class="t-cmd">&nbsp;<span class="cursor"></span></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <p class="cta-label">// següent pas</p>
+        <h2 class="cta-title">ENCARA<br>DORMS?<br><span>UNEIX-TE.</span></h2>
+        <a href="formulari.html" class="cta-btn"><span>ACCEDIR A LA XARXA</span></a>
+    </section>
+
+    <footer>
+        <div class="footer-logo">FSOCIETY</div>
+        <p class="footer-text">© 2026 — XIFRAT. SENSE REGISTRES. SENSE RASTRE.</p>
+        <p class="footer-text" style="color: rgba(255,34,34,0.4);">SOM FSOCIETY</p>
+    </footer>
+
+</body>
+</html>

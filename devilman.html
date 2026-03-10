@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEVILMAN crybaby — SOUND OF BLOOD</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+JP:wght@900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blood: #8B0000;
+    --blood-bright: #C0392B;
+    --gore: #FF1A1A;
+    --black: #050505;
+    --void: #0A0000;
+    --ash: #1A1A1A;
+    --bone: #D4C5A9;
+    --pale: #E8DDD0;
+    --ink: #2A0A0A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--void);
+    color: var(--pale);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* Blood drip top */
+  .blood-top {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, transparent, var(--blood) 20%, var(--gore) 50%, var(--blood) 80%, transparent);
+    z-index: 100;
+    box-shadow: 0 0 30px var(--blood-bright), 0 0 60px var(--blood);
+  }
+
+  .blood-top::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    height: 80px;
+    background: linear-gradient(to bottom, var(--blood) 0%, transparent 100%);
+    opacity: 0.15;
+  }
+
+  /* Header / Hero */
+  header {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 80px 20px;
+  }
+
+  .bg-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  /* Animated wings / demon silhouette SVG */
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+  }
+
+  .eyeball {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 30px;
+    position: relative;
+    animation: pulse-eye 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-eye {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--blood)); }
+    50% { transform: scale(1.08); filter: drop-shadow(0 0 30px var(--gore)); }
+  }
+
+  .title-main {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 18vw, 14rem);
+    line-height: 0.85;
+    letter-spacing: -2px;
+    color: var(--pale);
+    position: relative;
+    text-shadow:
+      3px 3px 0 var(--blood),
+      6px 6px 0 var(--ink),
+      0 0 60px rgba(192,57,43,0.4);
+    animation: flicker 8s infinite;
+  }
+
+  .title-main span {
+    display: block;
+    color: var(--gore);
+    font-size: 0.45em;
+    letter-spacing: 8px;
+    text-shadow: 0 0 20px var(--gore), 0 0 60px var(--blood);
+    animation: flicker-sub 6s infinite 1s;
+  }
+
+  @keyframes flicker {
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0.7; }
+    97% { opacity: 1; }
+    98% { opacity: 0.4; }
+    99% { opacity: 1; }
+  }
+
+  @keyframes flicker-sub {
+    0%, 92%, 100% { opacity: 1; }
+    93% { opacity: 0.3; }
+    94% { opacity: 1; }
+  }
+
+  .subtitle {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    letter-spacing: 6px;
+    color: var(--blood-bright);
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 2;
+    opacity: 0.5;
+    animation: bounce 2s infinite;
+  }
+
+  .scroll-hint span {
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    color: var(--bone);
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* Divider blood */
+  .divider {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blood-bright), var(--gore), var(--blood-bright), transparent);
+    position: relative;
+    margin: 0;
+  }
+
+  .divider::before {
+    content: '✦ REFLEXIÓ ✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--void);
+    padding: 0 20px;
+    font-size: 0.65rem;
+    letter-spacing: 6px;
+    color: var(--blood-bright);
+    white-space: nowrap;
+  }
+
+  /* Text section */
+  .text-section {
+    padding: 80px 20px 120px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    letter-spacing: 4px;
+    color: var(--bone);
+    margin-bottom: 50px;
+    position: relative;
+    display: inline-block;
+  }
+
+  .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--blood-bright);
+    box-shadow: 0 0 10px var(--blood);
+  }
+
+  /* Text container */
+  .reflexion-block {
+    position: relative;
+    border: 1px solid rgba(139,0,0,0.2);
+    border-left: 4px solid var(--blood);
+    padding: 50px 50px 50px 54px;
+    background: linear-gradient(160deg, rgba(139,0,0,0.06) 0%, rgba(10,0,0,0.5) 100%);
+    animation: card-in 0.8s ease both;
+  }
+
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reflexion-block::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 10% 20%, rgba(192,57,43,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* Opening quote mark */
+  .reflexion-block::after {
+    content: '"';
+    font-family: 'Noto Serif JP', serif;
+    font-size: 12rem;
+    color: var(--blood);
+    opacity: 0.07;
+    position: absolute;
+    top: -20px;
+    left: 20px;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  /* =============================================
+     AQUÍ VA EL TEXT REFLEXIU
+     Substitueix el contingut de .reflexion-text
+     quan tinguis el text llest.
+  ============================================= */
+  .reflexion-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    line-height: 1.9;
+    color: var(--pale);
+    opacity: 0.88;
+    position: relative;
+    z-index: 1;
+    white-space: pre-wrap;
+    /* El text s'afegirà aquí */
+  }
+
+  .reflexion-text p {
+    margin-bottom: 1.6em;
+  }
+
+  .reflexion-text p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Highlighted fragments dins el text */
+  .reflexion-text em {
+    font-style: normal;
+    color: var(--gore);
+    text-shadow: 0 0 12px rgba(255,26,26,0.4);
+  }
+
+  .reflexion-text strong {
+    color: var(--bone);
+    font-weight: normal;
+    border-bottom: 1px solid rgba(139,0,0,0.4);
+  }
+
+  /* Signatura / autor al final */
+  .reflexion-signature {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(139,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .signature-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--blood), transparent);
+  }
+
+  .signature-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 4px;
+    color: var(--blood-bright);
+    opacity: 0.7;
+  }
+
+  /* Footer */
+  footer {
+    padding: 40px 20px;
+    text-align: center;
+    border-top: 1px solid rgba(139,0,0,0.15);
+    font-size: 0.65rem;
+    letter-spacing: 4px;
+    color: var(--blood);
+    opacity: 0.5;
+  }
+
+  /* Splatter accents */
+  .splatter {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.06;
+  }
+
+  /* Glitch effect */
+  @keyframes glitch {
+    0% { clip-path: none; transform: none; }
+    92% { clip-path: none; transform: none; }
+    93% { clip-path: rect(10px, 9999px, 40px, 0); transform: translate(-4px, 0) skewX(-2deg); }
+    94% { clip-path: rect(60px, 9999px, 90px, 0); transform: translate(4px, 0); }
+    95% { clip-path: none; transform: none; }
+    98% { clip-path: rect(30px, 9999px, 50px, 0); transform: translate(-2px, 0); }
+    100% { clip-path: none; transform: none; }
+  }
+
+  .title-main {
+    animation: flicker 8s infinite, glitch 10s infinite;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--void); }
+  ::-webkit-scrollbar-thumb { background: var(--blood); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gore); }
+</style>
+</head>
+<body>
+
+<div class="blood-top"></div>
+
+<header>
+  <!-- Background SVG - demon wings / abstract gore -->
+  <svg class="bg-svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#8B0000" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#050505" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="glow2" cx="20%" cy="70%" r="40%">
+        <stop offset="0%" stop-color="#C0392B" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </radialGradient>
+      <filter id="blur-f">
+        <feGaussianBlur stdDeviation="8"/>
+      </filter>
+    </defs>
+
+    <!-- Background blood pools -->
+    <ellipse cx="600" cy="400" rx="500" ry="300" fill="url(#glow1)"/>
+    <ellipse cx="200" cy="600" rx="200" ry="150" fill="url(#glow2)"/>
+
+    <!-- Wing left -->
+    <path d="M600,400 C500,300 300,200 100,350 C0,420 50,550 150,500 C250,450 350,380 450,370 C480,368 520,380 560,390Z"
+          fill="#8B0000" opacity="0.12"/>
+    <path d="M600,400 C520,320 380,230 200,280 C120,300 80,380 120,420 C200,480 350,420 480,390Z"
+          fill="#C0392B" opacity="0.06"/>
+
+    <!-- Wing right -->
+    <path d="M600,400 C700,300 900,200 1100,350 C1200,420 1150,550 1050,500 C950,450 850,380 750,370 C720,368 680,380 640,390Z"
+          fill="#8B0000" opacity="0.12"/>
+    <path d="M600,400 C680,320 820,230 1000,280 C1080,300 1120,380 1080,420 C1000,480 850,420 720,390Z"
+          fill="#C0392B" opacity="0.06"/>
+
+    <!-- Spine / central spikes -->
+    <path d="M600,600 L580,350 L600,280 L620,350 Z" fill="#8B0000" opacity="0.2"/>
+    <path d="M600,580 L560,380 L600,300 L640,380 Z" fill="#C0392B" opacity="0.08"/>
+
+    <!-- Blood drip lines -->
+    <g opacity="0.08" stroke="#C0392B" stroke-width="1.5" fill="none">
+      <path d="M200,0 Q205,80 195,120 Q190,160 200,200"/>
+      <path d="M400,0 Q415,60 405,100 Q395,150 410,190"/>
+      <path d="M700,0 Q710,70 700,110 Q690,160 705,200"/>
+      <path d="M900,0 Q905,90 895,130 Q885,180 900,220"/>
+      <path d="M1100,0 Q1108,55 1098,95 Q1088,145 1100,175"/>
+    </g>
+
+    <!-- Small splatter dots -->
+    <g fill="#8B0000" opacity="0.15">
+      <circle cx="150" cy="150" r="3"/>
+      <circle cx="163" cy="158" r="1.5"/>
+      <circle cx="140" cy="165" r="2"/>
+      <circle cx="172" cy="143" r="1"/>
+      <circle cx="1020" cy="200" r="3.5"/>
+      <circle cx="1035" cy="190" r="1.5"/>
+      <circle cx="1010" cy="215" r="2"/>
+      <circle cx="300" cy="600" r="2.5"/>
+      <circle cx="315" cy="608" r="1.5"/>
+      <circle cx="880" cy="650" r="3"/>
+      <circle cx="893" cy="640" r="2"/>
+    </g>
+
+    <!-- Eye shapes -->
+    <g opacity="0.15">
+      <ellipse cx="300" cy="250" rx="25" ry="12" fill="#8B0000"/>
+      <circle cx="300" cy="250" r="7" fill="#C0392B"/>
+      <circle cx="300" cy="250" r="4" fill="#0A0000"/>
+      <ellipse cx="900" cy="280" rx="25" ry="12" fill="#8B0000"/>
+      <circle cx="900" cy="280" r="7" fill="#C0392B"/>
+      <circle cx="900" cy="280" r="4" fill="#0A0000"/>
+    </g>
+  </svg>
+
+  <div class="hero-content">
+    <!-- Central eye SVG -->
+    <div class="eyeball">
+      <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="iris" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#C0392B"/>
+            <stop offset="60%" stop-color="#8B0000"/>
+            <stop offset="100%" stop-color="#3D0000"/>
+          </radialGradient>
+          <radialGradient id="eye-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FF1A1A" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+        </defs>
+        <!-- Outer glow -->
+        <circle cx="60" cy="60" r="58" fill="url(#eye-glow)"/>
+        <!-- Sclera with blood vessels -->
+        <ellipse cx="60" cy="60" rx="55" ry="38" fill="#1A0000"/>
+        <ellipse cx="60" cy="60" rx="54" ry="37" fill="#0D0000"/>
+        <!-- Blood vessels -->
+        <g stroke="#8B0000" stroke-width="0.8" fill="none" opacity="0.6">
+          <path d="M10,55 Q25,50 35,58 Q40,62 50,60"/>
+          <path d="M15,65 Q30,60 38,68 Q42,72 48,70"/>
+          <path d="M110,55 Q95,50 85,58 Q80,62 70,60"/>
+          <path d="M105,65 Q90,60 82,68 Q78,72 72,70"/>
+          <path d="M50,25 Q55,35 58,45"/>
+          <path d="M70,25 Q65,35 62,45"/>
+          <path d="M50,95 Q55,85 58,75"/>
+          <path d="M70,95 Q65,85 62,75"/>
+        </g>
+        <!-- Iris -->
+        <circle cx="60" cy="60" r="28" fill="url(#iris)"/>
+        <!-- Iris detail -->
+        <g stroke="#C0392B" stroke-width="0.5" opacity="0.4">
+          <line x1="60" y1="32" x2="60" y2="88"/>
+          <line x1="32" y1="60" x2="88" y2="60"/>
+          <line x1="40" y1="40" x2="80" y2="80"/>
+          <line x1="80" y1="40" x2="40" y2="80"/>
+        </g>
+        <!-- Pupil -->
+        <circle cx="60" cy="60" r="14" fill="#050505"/>
+        <!-- Pupil reflection -->
+        <circle cx="67" cy="53" r="4" fill="rgba(255,255,255,0.08)"/>
+        <!-- Highlight -->
+        <ellipse cx="45" cy="48" rx="6" ry="4" fill="rgba(255,255,255,0.05)" transform="rotate(-20 45 48)"/>
+      </svg>
+    </div>
+
+    <h1 class="title-main">
+      DEVILMAN
+      <span>crybaby</span>
+    </h1>
+    <p class="subtitle">∴ SOUND OF BLOOD ∴ FLESH & CHAOS ∴</p>
+  </div>
+
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <svg width="16" height="24" viewBox="0 0 16 24" fill="none">
+      <rect x="1" y="1" width="14" height="22" rx="7" stroke="#8B0000" stroke-width="1.5"/>
+      <circle cx="8" cy="7" r="2" fill="#C0392B">
+        <animate attributeName="cy" values="7;15;7" dur="2s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  </div>
+</header>
+
+<div class="divider"></div>
+
+<!-- Text reflexiu -->
+<section class="text-section">
+  <h2 class="section-title">// REFLEXIÓ</h2>
+
+  <div class="reflexion-block">
+    <div class="reflexion-text">
+
+
+
+      <p># DEVILMAN CRYBABY — O COM EL MÓN JA S'HA CAGAT EN NOSALTRES I ENCARA APLAUDIM
+DEVILMAN CRYBABY — O COM EL MÓN JA S'HA CAGAT EN NOSALTRES I ENCARA APLAUDIM
+
+per si no t'has adonat que ja som als últims capítols
+
+
+Mira. T'has vist Devilman Crybaby i has pensat que era una sèrie de dimonis, de sang, de tios que es foten contra monstres enormes mentre tothom perd el cap literalment. Sí. És tot això. Però si t'has quedat amb només això, és que Masaaki Yuasa t'ha passat el missatge per davant dels morros i l'has esquivat com esquivem tot el que ens incomoda de veritat.
+
+Devilman no va de dimonis. Va de nosaltres. I és una puta tragèdia.
+
+
+EL CAOS COM A EXCUSA PER TREURE EL QUE JA ÉREM
+
+Hi ha una escena que ho diu tot. Quan la gent descobreix que els dimonis existeixen, que caminen entre ells, que el veí, la professora, el cunyat podrien ser un d'ells — no s'organitzen. No pensen. Agafen el mòbil, graven, i cremen.
+
+I et juro per tot el que tens que jo he vist exactament aquesta escena al Twitter de casa meva. Canvia "dimoni" per "immigrant", per "mantero", per "persona trans", per "el de l'altre barri" — i el guió no canvia ni una coma. La lògica de la caça de bruixes és universal perquè la por és el combustible més barat que existeix, i als de dalt els surt gratuïta perquè la posem nosaltres.
+
+El que Yuasa fa, i que és genial i fotre's molt amb tu alhora, és que no posa els humans com a víctimes innocents del caos. Els posa com el que som: éssers que esperaven una excusa. El dimoni no va corrompre la humanitat. La humanitat ja estava corrupta i el dimoni li va donar cobertura legal.
+
+Això és exactament el que fa el feixisme quan puja. No crea odi nou. Desembossa l'odi vell que ja teníem embussat darrere d'anys de "soc una bona persona" i "jo no soc racista però..." i "entenc que la gent estigui enfadada". El discurs d'odi no és un virus estrany que ens envaeix des de fora. És un virus endèmic que ja portàvem i que certs polítics saben molt bé com activar.
+
+
+AKIRA FUDOU: L'ÚLTIM TONTO QUE CREIA EN LA GENT
+
+Akira és un plor amb potes. Un noi tan increïblement ingenu que quan li passes un dimoni per dins continua plorant pels altres. I això, en termes narratius, és la decisió més brutal que podia prendre Yuasa: fer que l'únic personatge que realment estima la humanitat sigui el que té un dimoni dins.
+
+Llegeix-ho bé: l'únic que defensa els humans no és humà del tot. I els humans, en resposta, el destrossen.
+
+Això no és ironia còsmica. Això és un retrat d'època. Quants cops has vist a algú defensar causes importants — sanitat pública, habitatge digne, drets bàsics — i l'has vist trinxat a les xarxes, a la feina, a la família? "Ets un idealista." "Estàs exagerat." "El món no funciona així." Com si tenir empatia fos una feblesa que cal corregir. Com si preocupar-te per algú que no és de la teva sang fos sospitós.
+
+Akira plora perquè veu morir gent i li importa. I el pengen a les xarxes socials per massa sensible. La rima amb la realitat és tan directa que fa mal als queixals.
+
+
+RYO ASUKA: EL LIBERAL IL·LUSTRAT QUE ENS DESTRUEIX PER AMOR PROPI
+
+Ara parlem del personatge de debò. Del que fa mal de veritat. Ryo Asuka — Satanàs — és el més humà de tots.
+
+Ryo no és un vilà de manual. No vol el mal pel mal. Ell creu en el que fa. Té una narrativa interna perfectament coherent, un sistema de valors propi, una intel·ligència brutalment superior a la de tots els que l'envolten. I precisament per tot això és el més perillós.
+
+Ryo és el tio que llença Akira a la festa de dimonis "pel seu bé". Que manipula, que utilitza, que sacrifica persones com a peces en un taulell — sempre amb la convicció absoluta que ell sap el que és millor. Que el que fa és necessari. Que el fi justifica.
+
+Qui és Ryo Asuka a la vida real? Fàcil. És el CEO de la startup que acomia 200 treballadors per "garantir la sostenibilitat del projecte". És el polític que retalla sanitat pública mentre parla d'eficiència. És el professor de universitat que et suspèn per "fer-te créixer". És el familiar que et fa mal "perquè t'estima". Sempre hi ha un discurs racional al darrere. Sempre hi ha una excel·lent raó per fer-te malbé.
+
+I el pitjor de Ryo — el que Yuasa no perdona — és que al final vol Akira. L'estima, a la seva manera podrida i possessiva. Però mai no va entendre que estimar algú no et dóna dret a destruir el seu món. Que l'amor sense respecte és control. Que la intel·ligència sense empatia és una arma de destrucció massiva disfressada de saviesa.
+
+Hi ha moltíssims Ryos solts pel món. Reconeixeràs el teu quan vegis que sempre té raó, sempre sap més, i quan tot s'enfonsa per culpa seva, troba la manera que la culpa sigui teva.
+
+
+LES XARXES SOCIALS COM A RITUAL DE LINXAMENT COL·LECTIU
+
+Yuasa va estrenar Devilman Crybaby el 2018 i sembla que tenia un puto cristall màgic perquè la seqüència del linxament via xarxes socials és 2024 de cap a peus.
+
+La mare de Miki, revelada com a dimoni. El vídeo viralitzat. La horda. Els comentaris. La mort filmada en directe mentre la gent fa like.
+
+Substitució directa: qualsevol persona que hagi estat cancelada de manera brutal, injusta, despietada. Qualsevol persona que hagi vist el seu nom circular a Twitter mentre milers de desconeguts decidien qui era sense conèixer-la. Qualsevol persona que hagi rebut amenaces de mort per una opinió, per una foto, per existir en el lloc equivocat en el moment equivocat.
+
+Les xarxes socials no ens van fer pitjors. Ens van donar infraestructura per ser el que ja érem a escala industrial. Ara el linxament no necessita plaça del poble. Necessita connexió WiFi i una mica d'indignació — que és el recurs més renovable de la humanitat.
+
+I la cosa més fotre's de tot és que quan participes en un linxament col·lectiu no sembla mal. Sembla justícia. Sembla que estàs del costat correcte. Sembla que per una vegada pertanys a alguna cosa. La pertinença és la droga. La víctima és l'excusa.
+
+Devilman ho mostra sense filtres: la Miki real, la que tothom diu que estima, és picada a trossos per la mateixa gent que hauria jurat defensar-la. I ningú para. Perquè ningú vol ser el següent.
+
+
+LA FI DEL MÓN COM A FINAL LÒGIC, NO COM A METÀFORA
+
+Aquí és on Yuasa trenca totes les regles del gènere i et deixa la mandíbula a terra. Devilman Crybaby no té final feliç perquè no en pot tenir. No és pessimisme gratuït. És honestedat estructural.
+
+El món s'acaba. Akira perd. Tot es destrueix. I Ryo, l'únic supervivent, s'adona que ha guanyat i no li importa res perquè l'única cosa que volia era Akira i ja no existeix.
+
+Ara llegeix-ho com a al·legoria del capitalisme tardà: un sistema que ha guanyat tots els combats possibles, que ha colonitzat fins i tot les nostres formes de rebel·lió, que ha convertit el punk en estètica, el feminisme en branding, l'ecologia en màrqueting — i que ara que ha guanyat no sap per què ho va fer. El sistema no té propòsit. Té inèrcia. I la inèrcia ens destrueix a tots, inclosos els que el mantenen.
+
+Estem vivint en el penúltim capítol de Devilman. No en el primer. No en el del mig on encara hi ha esperança. En aquell on les forces ja estan activades i el compte enrere ja corre i la gent segueix discutint a Twitter de si el vestit és blau o daurat.
+
+
+PERÒ ALESHORES PER QUÈ AKIRA CONTINUA LLUITANT?
+
+Aquí està el cor del que vol dir Yuasa. I és el que no et deixes veure si et quedes amb la sang i els dimonis.
+
+Akira sap que perdrà. Ho sap des del moment que Ryo li explica el pla. Ho sap quan veu morir els seus. Ho sap quan el món es comença a trencar per les costures. I lluitarà igualment.
+
+No per guanyar. No perquè tingui un pla. Sinó perquè rendir-se seria trair tot el que ha estimat. Perquè la Miki hauria volgut que seguís. Perquè hi ha una dignitat en resistir que no depèn del resultat.
+
+I aquí Devilman et dona la bufetada final: la pregunta no és si guanyarem. La pregunta és si serem dignes del que defensem.
+
+Vivim en un moment on el cinisme és la postura per defecte. On dir "tot és una merda i no canviarà res" sembla intel·ligent i creure en alguna cosa sembla ingenu. On la ironia és una armadura i l'esperança és cosa de crios. Ryo Asuka és el personatge més cínic de la sèrie. I destrueix el món.
+
+Potser la ingenuïtat d'Akira no és debilitat. Potser és l'única forma de resistència que queda quan tot la resta ha estat colonitzat.
+
+
+EPÍLEG: EL QUE T'EMPORTES SI ETS HONEST AMB TU MATEIX
+
+Devilman Crybaby no és una sèrie còmoda. No et deixa al sofà pensant que els dolents són els dimonis i els bons som nosaltres. Et fa seure davant d'un mirall molt gran i et pregunta: tu series dels que salven la Miki o dels que graven el vídeo?
+
+I la resposta honesta — la de debò, no la que donaries en públic — probablement fa vergonya.
+
+Perquè tots hem fet like en alguna cosa que no teníem prou context per jutjar. Tots hem rigut d'algú quan era còmode. Tots hem callat quan parlar tenia cost. Tots portem una mica de Ryo i una mica d'Akira, i la feina és decidir quin dels dos alimentes.
+
+El món de Devilman s'acaba perquè tothom tria el fàcil en el moment clau. El nostre encara no ha acabat. Però els moments clau ja estan passant. Cada dia. A les urnes, al supermercat, a les xarxes, al lloc de feina, a la conversa familiar que t'has evitat tenir perquè era incòmoda.
+
+Akira hauria tingut la conversa. Hauria plorat i tot. I hauria tingut la conversa.
+
+La pregunta ets tu.
+
+
+"Fins i tot els àngels ploren quan veuen la humanitat."
+Devilman Crybaby, ep. 10
+
+
+    </div>
+
+    <div class="reflexion-signature">
+      <div class="signature-line"></div>
+      <div class="signature-name">— DEVILMAN CRYBABY —</div>
+      <div class="signature-line" style="background: linear-gradient(90deg, transparent, var(--blood));"></div>
+    </div>
+  </div>
+
+</section>
+
+<footer>
+  ∴ DEVILMAN CRYBABY · GO NAGAI · BLOOD NEVER DRIES ∴
+</footer>
+
+<script>
+  // Blood cursor trail
+  document.addEventListener('mousemove', (e) => {
+    if (Math.random() > 0.93) {
+      const dot = document.createElement('div');
+      dot.style.cssText = `
+        position:fixed; pointer-events:none; z-index:9998;
+        width:${Math.random()*4+2}px; height:${Math.random()*4+2}px;
+        border-radius:50%; background:#8B0000;
+        left:${e.clientX}px; top:${e.clientY}px;
+        opacity:0.7; transform:translate(-50%,-50%);
+        transition: opacity 1s;
+      `;
+      document.body.appendChild(dot);
+      setTimeout(() => { dot.style.opacity = '0'; }, 100);
+      setTimeout(() => dot.remove(), 1200);
+    }
+  });
+</script>
+</body>
+</html>

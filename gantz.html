@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GANTZ — SISTEMA ZERO</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Noto+Sans+JP:wght@300;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --negro: #000000;
+    --rojo-gantz: #cc0000;
+    --rojo-sangre: #8b0000;
+    --verde-hud: #00ff41;
+    --verde-dim: #003b0e;
+    --blanco-hueso: #e0ddd5;
+    --gris-metal: #1a1a1a;
+    --gris-medio: #2e2e2e;
+    --amarillo-alerta: #ffcc00;
+    --cyan-hud: #00d4ff;
+    --texto-hud: #a0f0a0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.4; }
+    94% { opacity: 1; }
+    97% { opacity: 0.2; }
+    98% { opacity: 1; }
+  }
+  @keyframes pulse-red {
+    0%, 100% { box-shadow: 0 0 10px #cc0000, 0 0 30px #cc000055; }
+    50% { box-shadow: 0 0 25px #cc0000, 0 0 60px #cc000088, inset 0 0 20px #cc000033; }
+  }
+  @keyframes glitch {
+    0% { clip-path: inset(0 0 98% 0); transform: translate(-3px, 0); }
+    10% { clip-path: inset(40% 0 50% 0); transform: translate(3px, 0); }
+    20% { clip-path: inset(80% 0 5% 0); transform: translate(-2px, 0); }
+    30% { clip-path: inset(20% 0 70% 0); transform: translate(2px, 0); }
+    40% { clip-path: inset(60% 0 30% 0); transform: translate(-3px, 0); }
+    50% { clip-path: inset(10% 0 85% 0); transform: translate(3px, 0); }
+    60% { clip-path: inset(90% 0 1% 0); transform: translate(-1px, 0); }
+    70% { clip-path: inset(50% 0 40% 0); transform: translate(2px, 0); }
+    80% { clip-path: inset(3% 0 92% 0); transform: translate(-3px, 0); }
+    90% { clip-path: inset(70% 0 20% 0); transform: translate(3px, 0); }
+    100% { clip-path: inset(0 0 98% 0); transform: translate(0, 0); }
+  }
+  @keyframes glow-green {
+    0%, 100% { text-shadow: 0 0 5px #00ff41, 0 0 15px #00ff41; }
+    50% { text-shadow: 0 0 15px #00ff41, 0 0 40px #00ff41, 0 0 80px #00ff4166; }
+  }
+  @keyframes sphere-rotate {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.05); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+  @keyframes entry-drop {
+    0% { transform: translateY(-60px); opacity: 0; filter: blur(8px); }
+    100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+  }
+  @keyframes noise {
+    0%, 100% { background-position: 0 0; }
+    10% { background-position: -5% -10%; }
+    20% { background-position: -15% 5%; }
+    30% { background-position: 7% -25%; }
+    40% { background-position: -5% 25%; }
+    50% { background-position: -15% 10%; }
+    60% { background-position: 15% 0%; }
+    70% { background-position: 0% 15%; }
+    80% { background-position: 3% 35%; }
+    90% { background-position: -10% 10%; }
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--negro);
+    color: var(--blanco-hueso);
+    font-family: 'Share Tech Mono', monospace;
+    overflow-x: hidden;
+    cursor: crosshair;
+    animation: flicker 8s infinite;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    animation: noise 0.5s steps(1) infinite;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.6;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(0, 255, 65, 0.06);
+    animation: scanline 4s linear infinite;
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    position: relative;
+    border-bottom: 2px solid var(--rojo-gantz);
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 50%, #1a000088 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.015) 2px, rgba(0,255,65,0.015) 4px),
+      #000;
+  }
+
+  .hero-grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,65,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,65,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 40px;
+    border-bottom: 1px solid #cc000044;
+    background: rgba(0,0,0,0.9);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--rojo-gantz);
+    text-transform: uppercase;
+    animation: entry-drop 0.6s ease forwards;
+    position: relative;
+    z-index: 10;
+  }
+
+  .top-bar .status { color: var(--verde-hud); animation: glow-green 2s infinite; }
+  .top-bar .timer { color: var(--amarillo-alerta); }
+
+  .hero-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 5;
+    padding: 60px 20px;
+    text-align: center;
+  }
+
+  .sphere {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #333, #000 70%);
+    border: 3px solid #222;
+    box-shadow:
+      0 0 0 8px #0a0a0a,
+      0 0 0 10px #cc000044,
+      0 0 60px #cc000088,
+      inset -20px -20px 40px rgba(0,0,0,0.8),
+      inset 10px 10px 30px rgba(255,255,255,0.05);
+    animation: sphere-rotate 20s linear infinite, pulse-red 3s ease-in-out infinite;
+    margin-bottom: 40px;
+    position: relative;
+  }
+  .sphere::before {
+    content: 'GANTZ';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 36px;
+    color: var(--verde-hud);
+    text-shadow: 0 0 20px #00ff41;
+    letter-spacing: 6px;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(70px, 15vw, 160px);
+    line-height: 0.9;
+    color: var(--blanco-hueso);
+    letter-spacing: -2px;
+    position: relative;
+  }
+  .hero-title .line-red {
+    color: var(--rojo-gantz);
+    display: block;
+    text-shadow: 0 0 30px #cc0000;
+  }
+  .hero-title::before {
+    content: attr(data-text);
+    position: absolute;
+    left: 3px;
+    top: 0;
+    color: var(--rojo-gantz);
+    opacity: 0.4;
+    animation: glitch 5s infinite;
+    pointer-events: none;
+    font-family: 'Bebas Neue', cursive;
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  .hero-sub {
+    font-size: 12px;
+    letter-spacing: 6px;
+    color: var(--verde-hud);
+    text-transform: uppercase;
+    margin-top: 20px;
+    animation: glow-green 3s infinite;
+  }
+
+  .hud-bar {
+    display: flex;
+    gap: 40px;
+    padding: 16px 40px;
+    border-top: 1px solid #cc000044;
+    background: rgba(0,0,0,0.95);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #555;
+    position: relative;
+    z-index: 10;
+  }
+  .hud-bar span { color: var(--verde-hud); }
+
+  /* ===== SECTIONS ===== */
+  section {
+    padding: 80px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .sec-label {
+    font-size: 10px;
+    letter-spacing: 5px;
+    color: var(--rojo-gantz);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .sec-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(40px, 6vw, 80px);
+    line-height: 1;
+    margin-bottom: 40px;
+    color: var(--blanco-hueso);
+    border-left: 6px solid var(--rojo-gantz);
+    padding-left: 20px;
+  }
+
+  /* ===== AUDIO SECTION ===== */
+  .audio-section {
+    background: var(--gris-metal);
+    padding: 80px 0;
+    border-top: 2px solid var(--rojo-gantz);
+    border-bottom: 2px solid var(--rojo-gantz);
+    position: relative;
+    overflow: hidden;
+  }
+  .audio-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 20px,
+      rgba(204,0,0,0.03) 20px,
+      rgba(204,0,0,0.03) 21px
+    );
+  }
+
+  .audio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .audio-card {
+    background: #000;
+    border: 1px solid #333;
+    padding: 24px;
+    position: relative;
+    transition: border-color 0.3s, transform 0.3s;
+    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  }
+  .audio-card:hover {
+    border-color: var(--rojo-gantz);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 40px rgba(204,0,0,0.3);
+  }
+
+  .audio-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .audio-num {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--rojo-gantz);
+    opacity: 0.4;
+  }
+
+  .audio-tag {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--verde-hud);
+    background: rgba(0,255,65,0.1);
+    border: 1px solid rgba(0,255,65,0.3);
+    padding: 3px 8px;
+  }
+
+  .audio-title-text {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    color: var(--blanco-hueso);
+  }
+
+  .audio-desc {
+    font-size: 11px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+
+  audio {
+    width: 100%;
+    height: 36px;
+    filter: invert(1) hue-rotate(100deg) saturate(0.5) brightness(0.7);
+    accent-color: var(--rojo-gantz);
+  }
+
+  /* ===== REFLEXIÓ SECTION ===== */
+  .reflexion-section {
+    background: #000;
+    padding: 100px 0;
+    position: relative;
+  }
+
+  .reflexion-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .reflexion-sidebar {
+    position: sticky;
+    top: 40px;
+  }
+
+  .sidebar-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 80px;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(204,0,0,0.3);
+    letter-spacing: 10px;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .sidebar-tags {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sidebar-tag {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: #444;
+    text-transform: uppercase;
+    border-left: 2px solid var(--rojo-gantz);
+    padding-left: 10px;
+    transition: color 0.3s;
+  }
+  .sidebar-tag:hover { color: var(--rojo-gantz); }
+
+  .reflexion-content { position: relative; }
+
+  .reflexion-box {
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-left: 4px solid var(--rojo-gantz);
+    padding: 48px;
+    position: relative;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%);
+  }
+  .reflexion-box::before {
+    content: '"';
+    position: absolute;
+    top: -30px;
+    left: 40px;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 140px;
+    color: rgba(204,0,0,0.15);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .reflexion-heading {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--blanco-hueso);
+    margin-bottom: 6px;
+  }
+  .reflexion-heading .accent { color: var(--rojo-gantz); }
+
+  .reflexion-byline {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: #444;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #1e1e1e;
+  }
+
+  .reflexion-text {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 2;
+    color: #aaa;
+    letter-spacing: 0.3px;
+  }
+  .reflexion-text p { margin-bottom: 24px; }
+  .reflexion-text strong { color: var(--blanco-hueso); font-weight: 700; }
+  .reflexion-text .highlight {
+    color: var(--verde-hud);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+  .reflexion-text .warning {
+    color: var(--amarillo-alerta);
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .reflexion-text .critical {
+    color: var(--rojo-gantz);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .reflexion-pullquote {
+    border-left: 3px solid var(--verde-hud);
+    padding: 16px 24px;
+    margin: 32px 0;
+    background: rgba(0,255,65,0.04);
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    color: var(--verde-hud);
+    letter-spacing: 2px;
+    animation: glow-green 4s infinite;
+  }
+
+  /* ===== TEMES GRID ===== */
+  .themes-section {
+    background: var(--gris-metal);
+    padding: 80px 0;
+    border-top: 1px solid #1a1a1a;
+  }
+  .themes-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .themes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 2px;
+    margin-top: 40px;
+  }
+
+  .theme-card {
+    background: #000;
+    padding: 32px 24px;
+    border: 1px solid #111;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s;
+  }
+  .theme-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 3px;
+    width: 0%;
+    background: var(--rojo-gantz);
+    transition: width 0.4s;
+  }
+  .theme-card:hover::before { width: 100%; }
+  .theme-card:hover { background: #0a0000; }
+
+  .theme-icon {
+    font-size: 36px;
+    margin-bottom: 16px;
+    display: block;
+    filter: grayscale(0.5);
+  }
+
+  .theme-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 28px;
+    color: var(--blanco-hueso);
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+
+  .theme-desc {
+    font-size: 11px;
+    color: #555;
+    line-height: 1.7;
+    letter-spacing: 0.5px;
+  }
+
+  .theme-tag {
+    position: absolute;
+    top: 16px; right: 16px;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: var(--rojo-gantz);
+    border: 1px solid rgba(204,0,0,0.3);
+    padding: 2px 6px;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    background: #000;
+    border-top: 2px solid var(--rojo-gantz);
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    animation: pulse-red 4s infinite;
+  }
+  footer .footer-text {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: #333;
+    text-transform: uppercase;
+    line-height: 2;
+  }
+  footer .footer-text span { color: var(--rojo-gantz); }
+  footer .footer-code {
+    font-size: 24px;
+    font-family: 'Bebas Neue', cursive;
+    color: var(--verde-hud);
+    letter-spacing: 10px;
+    animation: glow-green 3s infinite;
+    margin-bottom: 12px;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #000; }
+  ::-webkit-scrollbar-thumb { background: var(--rojo-gantz); }
+  ::-webkit-scrollbar-thumb:hover { background: #ff0000; }
+
+  @media (max-width: 768px) {
+    .reflexion-inner { grid-template-columns: 1fr; }
+    .sidebar-label { writing-mode: horizontal-tb; font-size: 50px; }
+    .top-bar { padding: 10px 20px; font-size: 9px; gap: 10px; flex-wrap: wrap; }
+    section { padding: 60px 20px; }
+    .audio-grid { padding: 0 20px; }
+    .reflexion-inner { padding: 0 20px; }
+    .themes-inner { padding: 0 20px; }
+    .reflexion-box { padding: 30px 24px; }
+    .hud-bar { flex-wrap: wrap; gap: 16px; padding: 12px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-grid-overlay"></div>
+
+  <div class="top-bar">
+    <div>SISTEMA_GANTZ :: PROTOCOL_ACTIU</div>
+    <div class="status">◉ EN LÍNIA</div>
+    <div class="timer">100:00:00</div>
+  </div>
+
+  <div class="hero-center">
+    <div class="sphere"></div>
+    <h1 class="hero-title" data-text="LA TEVA VIDA">
+      LA TEVA VIDA<br>
+      <span class="line-red">JA HA ACABAT</span>
+    </h1>
+    <p class="hero-sub">Distopia · Sobrenatural · Crítica Social · Supervivència</p>
+  </div>
+
+  <div class="hud-bar">
+    <div>MISSIÓ: <span>ACTIVA</span></div>
+    <div>JUGADORS: <span>???</span></div>
+    <div>UBICACIÓ: <span>TOKYO_SECTOR_07</span></div>
+    <div>VESTIT: <span>CARREGANT...</span></div>
+    <div>OBJECTIU: <span>CLASSIFICAT</span></div>
+  </div>
+</div>
+
+<!-- ===== TEMES ===== -->
+<div class="themes-section">
+  <div class="themes-inner">
+    <span class="sec-label">// mòdul_temàtic</span>
+    <h2 class="sec-title">TEMES CENTRALS</h2>
+    <div class="themes-grid">
+      <div class="theme-card">
+        <div class="theme-tag">NUCLI</div>
+        <span class="theme-icon">☠</span>
+        <div class="theme-name">MORTALITAT</div>
+        <div class="theme-desc">La mort com a frontera borrosa. Gantz els rescata però ¿els salva? La vida després de morir com a metàfora d'existències buides.</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-tag">DISTOPIA</div>
+        <span class="theme-icon">🌆</span>
+        <div class="theme-name">CONTROL</div>
+        <div class="theme-desc">Una esfera negra com a sistema de poder absolut. Sense explicacions. Sense elecció. L'obediència o la mort com a únic contracte social.</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-tag">SOBRENATURAL</div>
+        <span class="theme-icon">👁</span>
+        <div class="theme-name">EXTRATERRESTRES</div>
+        <div class="theme-desc">Alienígenes que són déus caiguts, vestigis d'altres civilitzacions. La humanitat com a espècie insignificant davant allò incomprensible.</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-tag">SOCIAL</div>
+        <span class="theme-icon">⚔</span>
+        <div class="theme-name">VIOLÈNCIA</div>
+        <div class="theme-desc">La violència espectacularitzada com a entreteniment. Gantz com a televisió de realitat duta a l'extrem lògic del capitalisme tardà.</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-tag">FILOSÒFIC</div>
+        <span class="theme-icon">🔮</span>
+        <div class="theme-name">IDENTITAT</div>
+        <div class="theme-desc">¿Ets tu si ets una còpia? La clonació com a crisi ontològica. El jo com a construcció fràgil, reemplaçable, descartable.</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-tag">CRÍTIC</div>
+        <span class="theme-icon">⚙</span>
+        <div class="theme-name">SISTEMA</div>
+        <div class="theme-desc">Ningú va triar ser aquí. Ningú coneix les regles completes. La societat com Gantz: arbitrària, cruel, i sense sortida visible.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ÀUDIO ===== -->
+<div class="audio-section">
+  <div class="audio-grid">
+    <div style="grid-column: 1 / -1; max-width: 600px; margin-bottom: 20px;">
+      <span class="sec-label">// arxiu_sonor</span>
+      <h2 class="sec-title">TRANSMISSIONS</h2>
+    </div>
+
+        <!-- Àudio 1 -->
+    <div class="audio-card">
+      <div class="audio-card-header">
+        <div class="audio-num">01</div>
+        <div class="audio-tag">DISTOPIA</div>
+      </div>
+      <div class="audio-title-text">AUDIO FORMAT MP3</div>
+      <div class="audio-desc">Reflexió sobre estructures de control invisible que operen més enllà de la voluntat individual.</div>
+      <audio controls>
+        <source src="assets/audios/Trauma - Aligns - Topic (128k).mp3" type="audio/mpeg">
+        El teu navegador no admet àudio HTML5.
+      </audio>
+    </div>
+
+    <!-- Àudio 2 -->
+    <div class="audio-card">
+      <div class="audio-card-header">
+        <div class="audio-num">02</div>
+        <div class="audio-tag">SOBRENATURAL</div>
+      </div>
+      <div class="audio-title-text">ADUIO EN FORMAT FLAC</div>
+      <div class="audio-desc">Allò que no podem comprendre ho anomenem déu. Allò que ens controla sense raó, ho anomenem destí.</div>
+      <audio controls>
+        <source src="assets/audios/Trauma - Aligns - Topic (192k).flac" type="audio/mpeg">
+        El teu navegador no admet àudio HTML5.
+      </audio>
+    </div>
+    <!-- Àudio 3 -->
+    <div class="audio-card">
+      <div class="audio-card-header">
+        <div class="audio-num">03</div>
+        <div class="audio-tag">SUPERVIVÈNCIA</div>
+      </div>
+      <div class="audio-title-text">AUDIO FORMAT WAV</div>
+      <div class="audio-desc">¿Què triaries si la llibertat fos literalment el preu de matar? Sobre el cost que paguem per sobreviure.</div>
+      <audio controls>
+        <source src="assets/audios/Trauma - Aligns - Topic (192k).wav" type="audio/mpeg">
+        El teu navegador no admet àudio HTML5.
+      </audio>
+    </div>
+
+    <!-- Àudio 4 -->
+    <div class="audio-card">
+      <div class="audio-card-header">
+        <div class="audio-num">04</div>
+        <div class="audio-tag">EXISTENCIAL</div>
+      </div>
+      <div class="audio-title-text">AUDIO FORMAT OGG</div>
+      <div class="audio-desc">Identitat, memòria i corporalitat. Si et clonen, ¿quin ets tu? La crisi de ser en un món de còpies.</div>
+      <audio controls>
+        <source src="assets/audios/Trauma - Aligns - Topic (192k).ogg" type="audio/mpeg">
+        El teu navegador no admet àudio HTML5.
+      </audio>
+    </div>
+
+
+
+
+</div>
+
+<!-- ===== REFLEXIÓ CRÍTICA ===== -->
+<div class="reflexion-section">
+  <div class="reflexion-inner">
+    <div class="reflexion-sidebar">
+      <div class="sidebar-label">REFLEXIÓ</div>
+      <div class="sidebar-tags">
+        <div class="sidebar-tag">CRÍTICA SOCIAL</div>
+        <div class="sidebar-tag">DISTOPIA</div>
+        <div class="sidebar-tag">SOBRENATURAL</div>
+        <div class="sidebar-tag">BIOÈTICA</div>
+        <div class="sidebar-tag">PODER I CONTROL</div>
+        <div class="sidebar-tag">ESPECTACLE</div>
+        <div class="sidebar-tag">IDENTITAT</div>
+      </div>
+    </div>
+
+    <div class="reflexion-content">
+      <div class="reflexion-box">
+        <h2 class="reflexion-heading">L'ESFERA NEGRA<br><span class="accent">COM A MIRALL</span></h2>
+        <div class="reflexion-byline">ANÀLISI CRÍTICA · VERSIÓ 1.0 · CLASSIFICAT: OBERT</div>
+
+        <div class="reflexion-text">
+          <p>
+            <strong>Gantz no és ciència-ficció.</strong> És un diagnòstic. Hiroya Oku va dissenyar una esfera negra que no dóna explicacions, no negocia, no té compassió — i en aquest disseny va retratar amb precisió brutal alguna cosa que ja coneixem: <span class="highlight">el sistema en què vivim</span>. Les regles arriben sense context. L'obediència no garanteix la supervivència. La mort pot arribar abans que entenguis per què ets aquí.
+          </p>
+
+          <div class="reflexion-pullquote">
+            "LA TEVA VIDA JA HA ACABAT. EL QUE FACIS D'ARA ENDAVANT DEPÈN DE MI."
+          </div>
+
+          <p>
+            Aquesta frase que obre el manga podria ser el discurs inaugural de qualsevol institució: l'Estat, la corporació, l'escola, l'hospital psiquiàtric. <span class="warning">S'et incorpora sense consentiment informat.</span> Se t'assignen missions que no has triat. Se t'avalua amb mètriques que no comprens. I si falles, no hi ha apel·lació — només l'esborrat silenciós. Gantz no va inventar l'horror. El va fer visible.
+          </p>
+
+          <p>
+            El vestit negre que potencia el cos dels jugadors és una altra metàfora perfecta: la tecnologia com a extensió del jo al servei de la violència legitimada. <strong>El capitalisme tecnològic ens promet el mateix tracte</strong> — més capacitat, més velocitat, més poder — a canvi que matem el que cal matar: la competència, la dissidència, la lentitud. El vestit no és una alliberació. És una cadena ergonòmica.
+          </p>
+
+          <p>
+            El sobrenatural a Gantz compleix una funció filosòfica precisa. Els alienígenes no són monstres: són <span class="highlight">éssers amb civilitzacions, memòries, famílies</span>. Alguns viuen entre humans sense que ningú ho sàpiga. Són l'Altre que no pot ser assimilat, i per això ha de ser eliminat. Aquí la crítica no és subtil: la xenofòbia i l'extermini sempre vénen embolcallats en la lògica de la missió necessària, de l'enemic que amenaça sense que ningú hagi confirmat l'amenaça.
+          </p>
+
+          <div class="reflexion-pullquote">
+            LA VIOLÈNCIA ESPECTACULARITZADA DEIXA DE SER VIOLÈNCIA — ES CONVERTEIX EN GÈNERE.
+          </div>
+
+          <p>
+            Guy Debord va escriure sobre la societat de l'espectacle dècades abans que Oku dibuixés la primera pàgina. A Gantz, l'espectacle és la missió mateixa: els jugadors actuen en escenaris dissenyats per al màxim horror, i el lector els observa amb la mateixa distància clínica amb la qual consumim notícies de guerra, vídeos virals de violència, realitys on la humiliació és el producte. <span class="critical">Som el públic de Gantz.</span> I Gantz ho sap.
+          </p>
+
+          <p>
+            La pregunta que el manga llança i mai no respon completament és la més inquietant: <strong>¿qui es beneficia del joc?</strong> ¿Qui va construir l'esfera? ¿Amb quin propòsit? Aquesta opacitat no és un error narratiu — és el punt. Vivim en sistemes el propòsit real dels quals ignorem. Treballem, consumim, reproduïm conductes sense accés a la lògica de fons. <span class="highlight">L'esfera mai no explica.</span> Tampoc ho fa el mercat, l'algorisme, la burocràcia.
+          </p>
+
+          <p>
+            Finalment, la clonació. Quan Kurono és reemplaçat per la seva còpia, l'obra s'endinsa en territori que la filosofia analítica porta dècades explorant: el problema de la identitat personal i la continuïtat del jo. Si hi ha dos Kuronos idèntics en memòria i cos, ¿quin és el «vertader»? La resposta de Gantz és brutal: <span class="warning">cap dels dos té privilegi ontològic.</span> Tots dos sofreixen igual. Tots dos moren igual. En un món de precarietat i reemplaçabilitat, tots som còpies d'un original que ja ningú recorda.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-code">GANTZ :: SISTEMA ZERO</div>
+  <div class="footer-text">
+    TOTS ELS JUGADORS HAN ESTAT <span>SELECCIONATS</span><br>
+    NO HI HA OPCIÓ D'ABANDONAR · NO HI HA EXPLICACIONS<br>
+    <span>// PROTOCOL_CRÍTIC :: VERSIÓ_FINAL :: CLASSIFICAT_OBERT</span>
+  </div>
+</footer>
+
+<script>
+  // Comptador dinàmic HUD
+  const timer = document.querySelector('.timer');
+  let seconds = 6000;
+  setInterval(() => {
+    if (seconds > 0) seconds--;
+    const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    if (timer) timer.textContent = `${h}:${m}:${s}`;
+  }, 1000);
+
+  // Entrada animada de targetes
+  const cards = document.querySelectorAll('.audio-card, .theme-card');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        entry.target.style.animation = `entry-drop 0.5s ease ${i * 0.08}s both`;
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  cards.forEach(c => observer.observe(c));
+
+  // Glitch aleatori al títol
+  const title = document.querySelector('.hero-title');
+  setInterval(() => {
+    if (Math.random() > 0.85) {
+      title.style.transform = `skewX(${(Math.random() - 0.5) * 3}deg)`;
+      setTimeout(() => { title.style.transform = ''; }, 100);
+    }
+  }, 2000);
+</script>
+</body>
+</html>

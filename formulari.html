@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F_SOCIETY // SECURE_CHANNEL</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+  :root {
+    --green: #00ff41;
+    --green-dim: #00cc33;
+    --green-dark: #003a10;
+    --green-glow: rgba(0,255,65,0.15);
+    --black: #000000;
+    --dark: #050505;
+    --panel: #060d06;
+    --text: #00aa2b;
+    --text-dim: #005515;
+    --white: #e0ffe8;
+    --red: #ff2200;
+    --amber: #ffaa00;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--black);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ---- CUSTOM CURSOR ---- */
+  .cursor {
+    position: fixed;
+    width: 20px; height: 20px;
+    border: 1px solid var(--green);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, border-color 0.2s;
+    box-shadow: 0 0 8px var(--green), inset 0 0 4px rgba(0,255,65,0.2);
+  }
+  .cursor-dot {
+    position: fixed;
+    width: 4px; height: 4px;
+    background: var(--green);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 6px var(--green);
+  }
+
+  /* ---- SCANLINES ---- */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+    animation: scanlines 8s linear infinite;
+  }
+
+  /* ---- VIGNETTE ---- */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.85) 100%);
+    pointer-events: none;
+    z-index: 99;
+  }
+
+  /* ---- MATRIX RAIN CANVAS ---- */
+  #matrixCanvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0.07;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ---- GLITCH OVERLAY ---- */
+  .glitch-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 98;
+    animation: glitch-flicker 10s infinite;
+  }
+
+  @keyframes glitch-flicker {
+    0%, 95%, 100% { opacity: 0; }
+    96% { opacity: 1; background: rgba(0,255,65,0.015); }
+    97% { opacity: 1; background: rgba(255,0,0,0.02); transform: translateX(2px); }
+    98% { opacity: 1; background: rgba(0,255,65,0.01); transform: translateX(-2px) skewX(1deg); }
+    99% { opacity: 0; }
+  }
+
+  @keyframes scanlines {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100px; }
+  }
+
+  /* ---- CONTAINER ---- */
+  .container {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+  }
+
+  /* ---- HEADER ---- */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeIn 1s ease both;
+  }
+
+  .header-terminal {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+    animation: typing 3s steps(40) both;
+    overflow: hidden;
+    white-space: nowrap;
+    width: fit-content;
+    margin: 0 auto 20px;
+    border-right: 2px solid var(--green);
+    animation: typing 2s steps(35) both, blink-cursor 0.8s step-end infinite;
+  }
+
+  @keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+  @keyframes blink-cursor {
+    50% { border-color: transparent; }
+  }
+
+  .fsociety-logo {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 20px;
+  }
+
+  .fsociety-logo .main-title {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: clamp(3rem, 10vw, 7rem);
+    letter-spacing: 0.08em;
+    color: var(--green);
+    text-shadow:
+      0 0 10px var(--green),
+      0 0 30px var(--green-dim),
+      0 0 80px rgba(0,255,65,0.3);
+    position: relative;
+    display: block;
+    animation: glitch-text 8s infinite;
+  }
+
+  .fsociety-logo .main-title::before,
+  .fsociety-logo .main-title::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+  }
+  .fsociety-logo .main-title::before {
+    color: var(--red);
+    animation: glitch-clip-1 8s infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 30%, 0 30%);
+    text-shadow: 2px 0 0 rgba(255,34,0,0.7);
+  }
+  .fsociety-logo .main-title::after {
+    color: #00ffff;
+    animation: glitch-clip-2 8s infinite;
+    clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
+    text-shadow: -2px 0 0 rgba(0,255,255,0.5);
+  }
+
+  @keyframes glitch-text {
+    0%, 90%, 100% { transform: none; }
+    92% { transform: skewX(-3deg) translateX(-2px); }
+    94% { transform: skewX(2deg) translateX(3px); }
+    96% { transform: none; }
+  }
+  @keyframes glitch-clip-1 {
+    0%, 90%, 100% { opacity: 0; transform: none; }
+    92% { opacity: 1; transform: translate(-3px, 0); }
+    94% { opacity: 0; }
+  }
+  @keyframes glitch-clip-2 {
+    0%, 93%, 100% { opacity: 0; transform: none; }
+    95% { opacity: 1; transform: translate(3px, 0); }
+    97% { opacity: 0; }
+  }
+
+  .subtitle {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  .subtitle span {
+    color: var(--green);
+    animation: flicker 3s infinite;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    91% { opacity: 1; }
+    92% { opacity: 0; }
+    93% { opacity: 1; }
+    95% { opacity: 0.4; }
+    96% { opacity: 1; }
+  }
+
+  /* ---- FORM CARD ---- */
+  .form-card {
+    background: rgba(0,8,2,0.97);
+    border: 1px solid rgba(0,255,65,0.2);
+    border-left: 3px solid var(--green);
+    box-shadow:
+      0 0 0 1px rgba(0,255,65,0.05),
+      0 0 40px rgba(0,255,65,0.08),
+      0 0 80px rgba(0,0,0,0.8),
+      inset 0 0 30px rgba(0,255,65,0.02);
+    padding: 0;
+    width: 100%;
+    max-width: 580px;
+    animation: fadeIn 1s 0.3s ease both;
+    position: relative;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- TERMINAL TITLEBAR ---- */
+  .terminal-bar {
+    background: rgba(0,255,65,0.07);
+    border-bottom: 1px solid rgba(0,255,65,0.15);
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .terminal-dots {
+    display: flex; gap: 6px;
+  }
+  .terminal-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: block;
+  }
+  .terminal-dots span:nth-child(1) { background: #ff5f56; box-shadow: 0 0 6px #ff5f56; }
+  .terminal-dots span:nth-child(2) { background: #ffbd2e; box-shadow: 0 0 6px #ffbd2e; }
+  .terminal-dots span:nth-child(3) { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+  .terminal-title {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    flex: 1;
+    text-align: center;
+  }
+
+  .terminal-title span {
+    color: var(--green);
+    animation: flicker 5s infinite;
+  }
+
+  /* ---- FORM BODY ---- */
+  .form-body {
+    padding: 36px 42px 42px;
+  }
+
+  /* ---- LOG LINES ---- */
+  .log-line {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    line-height: 1.8;
+    border-left: 2px solid var(--green-dark);
+    padding-left: 12px;
+    animation: fadeIn 1.5s ease both;
+  }
+  .log-line .ts { color: rgba(0,255,65,0.3); }
+  .log-line .ok { color: var(--green); }
+  .log-line .warn { color: var(--amber); }
+
+  /* ---- FORM ELEMENTS ---- */
+  .form-group {
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  label .prefix {
+    color: var(--green);
+    font-size: 0.75rem;
+  }
+
+  label .req {
+    color: var(--red);
+    margin-left: auto;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+  }
+
+  input, textarea {
+    width: 100%;
+    background: rgba(0,255,65,0.025);
+    border: none;
+    border-bottom: 1px solid rgba(0,255,65,0.2);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    padding: 12px 14px;
+    outline: none;
+    transition: all 0.3s ease;
+    letter-spacing: 0.05em;
+    caret-color: var(--green);
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: rgba(0,255,65,0.2);
+    font-style: normal;
+  }
+
+  input:focus, textarea:focus {
+    background: rgba(0,255,65,0.05);
+    border-bottom-color: var(--green);
+    box-shadow: 0 4px 20px rgba(0,255,65,0.1), inset 0 0 10px rgba(0,255,65,0.03);
+    color: #fff;
+  }
+
+  /* active line indicator */
+  .field-wrap {
+    position: relative;
+  }
+  .field-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px;
+    width: 0;
+    background: var(--green);
+    box-shadow: 0 0 10px var(--green);
+    transition: width 0.4s ease;
+  }
+  .field-wrap:focus-within::after {
+    width: 100%;
+  }
+
+  textarea {
+    resize: none;
+    height: 120px;
+    line-height: 1.7;
+  }
+
+  /* ---- PROGRESS BAR ---- */
+  .progress-bar-wrap {
+    height: 2px;
+    background: rgba(0,255,65,0.08);
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--green-dark), var(--green));
+    transition: width 0.5s ease;
+    box-shadow: 0 0 8px var(--green);
+  }
+
+  /* ---- SUBMIT BUTTON ---- */
+  .btn-submit {
+    width: 100%;
+    padding: 16px 24px;
+    background: transparent;
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+  }
+
+  .btn-submit::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,255,65,0.15), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .btn-submit::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--green);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s ease;
+    z-index: -1;
+  }
+
+  .btn-submit:hover {
+    color: var(--black);
+    box-shadow: 0 0 20px rgba(0,255,65,0.4), 0 0 60px rgba(0,255,65,0.1);
+    text-shadow: none;
+  }
+  .btn-submit:hover::after {
+    transform: scaleX(1);
+  }
+  .btn-submit:hover::before {
+    left: 100%;
+  }
+
+  /* ---- STATUS BAR ---- */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    border-top: 1px solid rgba(0,255,65,0.1);
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+  }
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .status-ip {
+    font-family: 'Share Tech Mono', monospace;
+    color: rgba(0,255,65,0.3);
+  }
+
+  /* ---- CORNER GLOW ---- */
+  .corner-glow {
+    position: absolute;
+    width: 60px; height: 60px;
+    pointer-events: none;
+  }
+  .corner-glow-tl { top: -1px; left: -1px; }
+  .corner-glow-br { bottom: -1px; right: -1px; transform: rotate(180deg); }
+
+  /* ---- SIDE TEXT ---- */
+  .side-text {
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%) rotate(90deg);
+    font-size: 0.55rem;
+    letter-spacing: 0.4em;
+    color: var(--text-dim);
+    opacity: 0.5;
+    transform-origin: center;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    pointer-events: none;
+  }
+
+  .side-text-left {
+    position: fixed;
+    left: 24px;
+    top: 50%;
+    writing-mode: vertical-rl;
+    font-size: 0.55rem;
+    letter-spacing: 0.4em;
+    color: var(--text-dim);
+    opacity: 0.3;
+    pointer-events: none;
+    transform: translateY(-50%);
+  }
+
+  /* ---- SCROLLING TICKER ---- */
+  .ticker {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0,255,65,0.05);
+    border-top: 1px solid rgba(0,255,65,0.1);
+    overflow: hidden;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    z-index: 200;
+  }
+  .ticker-content {
+    white-space: nowrap;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    animation: ticker-scroll 30s linear infinite;
+    padding-left: 100%;
+  }
+  .ticker-content span { color: var(--green); margin: 0 24px; }
+  @keyframes ticker-scroll {
+    to { transform: translateX(-100%); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="matrixCanvas"></canvas>
+<div class="glitch-overlay"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- SIDE DECORATIONS -->
+<div class="side-text">FSOCIETY // ENCRYPTED // SECURE_CHANNEL // ANONYMOUS</div>
+<div class="side-text-left">SYS_REF: 0xDEADBEEF // PROTOCOL: TOR // VERSION: 3.1.4</div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <p class="header-terminal">root@fsociety:~$ ./init_contact_protocol.sh</p>
+    <div class="fsociety-logo">
+      <span class="main-title" data-text="F_SOCIETY">F_SOCIETY</span>
+    </div>
+    <p class="subtitle">SECURE COMMUNICATION CHANNEL // <span>ONLINE</span></p>
+  </div>
+
+  <!-- FORM CARD -->
+  <div class="form-card">
+    <!-- Corner glows -->
+    <svg class="corner-glow corner-glow-tl" viewBox="0 0 60 60" fill="none">
+      <path d="M0 60 L0 0 L60 0" stroke="rgba(0,255,65,0.5)" stroke-width="1" fill="none"/>
+      <path d="M0 40 L0 0 L40 0" stroke="rgba(0,255,65,0.2)" stroke-width="1" fill="none"/>
+    </svg>
+    <svg class="corner-glow corner-glow-br" viewBox="0 0 60 60" fill="none">
+      <path d="M0 60 L0 0 L60 0" stroke="rgba(0,255,65,0.5)" stroke-width="1" fill="none"/>
+    </svg>
+
+    <!-- Terminal titlebar -->
+    <div class="terminal-bar">
+      <div class="terminal-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="terminal-title">[ <span>SECURE_MSG_CLIENT</span> v2.1.7 // PGP ENABLED ]</div>
+    </div>
+
+    <!-- Form body -->
+    <div class="form-body">
+
+      <!-- Log lines -->
+      <div class="log-line">
+        <span class="ts">[2025-11-05 00:00:00]</span> <span class="ok">CONN_ESTABLISHED</span> // TOR_RELAY: active<br>
+        <span class="ts">[2025-11-05 00:00:01]</span> <span class="ok">ENCRYPTION</span> // AES-256 initialized<br>
+        <span class="ts">[2025-11-05 00:00:02]</span> <span class="warn">WARNING</span> // YOU_ARE_BEING_WATCHED — stay anonymous
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+
+      <form id="contactForm" novalidate>
+
+        <div class="form-group">
+          <label>
+            <span class="prefix">&gt;_</span> Handle / Alias
+            <span class="req">[ REQUIRED ]</span>
+          </label>
+          <div class="field-wrap">
+            <input type="text" id="nombre" placeholder="mr_robot / elliot / anonymous..." autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="prefix">&gt;_</span> Encrypted Channel
+            <span class="req">[ REQUIRED ]</span>
+          </label>
+          <div class="field-wrap">
+            <input type="email" id="email" placeholder="user@protonmail.com" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="prefix">&gt;_</span> Message Payload
+            <span class="req">[ REQUIRED ]</span>
+          </label>
+          <div class="field-wrap">
+            <textarea id="mensaje" placeholder="// BEGIN PGP MESSAGE&#10;// Your encrypted payload here..." spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+          &gt; TRANSMIT_SECURE_MESSAGE.exe
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <div class="status-indicator">
+        <div class="status-dot"></div>
+        <span>CHANNEL SECURE</span>
+      </div>
+      <span class="status-ip" id="fakeIp">IP: 192.168.—.— // MASKED</span>
+      <span>END-TO-END ENCRYPTED</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-content">
+    <span>FSOCIETY</span> WE ARE EVERYWHERE // <span>ALERT</span> E-CORP SERVERS COMPROMISED // <span>STATUS</span> REVOLUTION IN PROGRESS // <span>NODE</span> TOR RELAY ACTIVE // <span>MSG</span> HELLO FRIEND. // <span>WARN</span> STAY ANONYMOUS // <span>INFO</span> ENCRYPT EVERYTHING // <span>FSOCIETY</span> WE ARE EVERYWHERE // <span>ALERT</span> E-CORP SERVERS COMPROMISED // <span>STATUS</span> REVOLUTION IN PROGRESS //
+  </div>
+</div>
+
+<script>
+  // ---- CUSTOM CURSOR ----
+  const cursor = document.getElementById('cursor');
+  const cursorDot = document.getElementById('cursorDot');
+  document.addEventListener('mousemove', (e) => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    cursorDot.style.left = e.clientX + 'px';
+    cursorDot.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('input, textarea, button, a').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.style.transform = 'translate(-50%, -50%) scale(2)');
+    el.addEventListener('mouseleave', () => cursor.style.transform = 'translate(-50%, -50%) scale(1)');
+  });
+
+  // ---- MATRIX RAIN ----
+  const canvas = document.getElementById('matrixCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ01001101101000110110FSOCIETY<>{}[]01';
+  const fontSize = 13;
+  const cols = Math.floor(canvas.width / fontSize);
+  const drops = Array(cols).fill(1);
+
+  function drawMatrix() {
+    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff41';
+    ctx.font = fontSize + 'px Share Tech Mono';
+    drops.forEach((y, i) => {
+      const char = chars[Math.floor(Math.random() * chars.length)];
+      const x = i * fontSize;
+      ctx.globalAlpha = Math.random() * 0.5 + 0.1;
+      ctx.fillStyle = y * fontSize < 100 ? '#ffffff' : '#00ff41';
+      ctx.fillText(char, x, y * fontSize);
+      ctx.globalAlpha = 1;
+      if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    });
+  }
+  setInterval(drawMatrix, 50);
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+
+  // ---- FAKE IP ----
+  function randomIP() {
+    return `10.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+  }
+  setInterval(() => {
+    document.getElementById('fakeIp').textContent = `IP: ${randomIP()} // MASKED`;
+  }, 2000);
+
+  // ---- PROGRESS BAR ON FILL ----
+  const fields = ['nombre', 'email', 'mensaje'];
+  function updateProgress() {
+    const filled = fields.filter(id => document.getElementById(id).value.trim()).length;
+    document.getElementById('progressBar').style.width = (filled / fields.length * 100) + '%';
+  }
+  fields.forEach(id => document.getElementById(id).addEventListener('input', updateProgress));
+
+  // ---- TYPEWRITER ON SUBMIT BUTTON ----
+  const btn = document.getElementById('submitBtn');
+  const originalText = btn.textContent;
+
+  // ---- FORM SUBMIT ----
+  document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const nombre = document.getElementById('nombre').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const mensaje = document.getElementById('mensaje').value.trim();
+
+    // VALIDATION ERROR
+    if (!nombre || !email || !mensaje) {
+      Swal.fire({
+        background: '#020d02',
+        color: '#00ff41',
+        title: '<span style="font-family:\'Orbitron\',monospace; font-size:1.1rem; color:#ff2200; letter-spacing:0.15em; text-shadow: 0 0 15px #ff2200;">ACCESS_DENIED</span>',
+        html: `
+          <div style="font-family:'Share Tech Mono',monospace; font-size:0.8rem; line-height:2; color:#005515; letter-spacing:0.1em; text-align:left; padding: 0 8px;">
+            <span style="color:#ff2200;">[ERROR]</span> MISSING_REQUIRED_FIELDS<br>
+            <span style="color:#ffaa00;">[WARN]</span> Transmission aborted.<br>
+            <span style="color:#00ff41;">[INFO]</span> Complete all fields to proceed.
+          </div>`,
+        confirmButtonText: '> RETRY',
+        customClass: { popup: 'swal-fsociety', confirmButton: 'swal-btn-fsociety swal-btn-error' },
+        showClass: { popup: '' },
+        backdrop: 'rgba(0,0,0,0.9)',
+        iconHtml: '<span style="color:#ff2200; font-size:2rem; text-shadow:0 0 20px #ff2200;">✕</span>',
+        iconColor: '#ff2200',
+      });
+      return;
+    }
+
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      Swal.fire({
+        background: '#020d02',
+        color: '#00ff41',
+        title: '<span style="font-family:\'Orbitron\',monospace; font-size:1rem; color:#ffaa00; letter-spacing:0.15em; text-shadow: 0 0 15px #ffaa00;">INVALID_CHANNEL</span>',
+        html: `<div style="font-family:'Share Tech Mono',monospace; font-size:0.8rem; line-height:2; color:#005515; letter-spacing:0.1em; text-align:left; padding:0 8px;">
+            <span style="color:#ff2200;">[ERROR]</span> MALFORMED_EMAIL_ADDRESS<br>
+            <span style="color:#ffaa00;">[WARN]</span> Cannot route to invalid endpoint.<br>
+            <span style="color:#00ff41;">[INFO]</span> Provide a valid encrypted channel.
+          </div>`,
+        confirmButtonText: '> FIX_INPUT',
+        customClass: { popup: 'swal-fsociety', confirmButton: 'swal-btn-fsociety swal-btn-warn' },
+        backdrop: 'rgba(0,0,0,0.9)',
+        iconHtml: '<span style="color:#ffaa00; font-size:2rem; text-shadow:0 0 20px #ffaa00;">⚠</span>',
+      });
+      return;
+    }
+
+    // LOADING SIMULATION
+    let dots = 0;
+    btn.disabled = true;
+    const loadInterval = setInterval(() => {
+      dots = (dots + 1) % 4;
+      btn.textContent = '> ENCRYPTING_MESSAGE' + '.'.repeat(dots);
+    }, 300);
+
+    setTimeout(() => {
+      clearInterval(loadInterval);
+      btn.textContent = originalText;
+      btn.disabled = false;
+
+      // SUCCESS
+      Swal.fire({
+        background: '#020d02',
+        color: '#00ff41',
+        title: '<span style="font-family:\'Orbitron\',monospace; font-size:1.1rem; color:#00ff41; letter-spacing:0.15em; text-shadow: 0 0 20px #00ff41;">TRANSMISSION_SUCCESS</span>',
+        html: `
+          <div style="font-family:'Share Tech Mono',monospace; font-size:0.78rem; line-height:2; letter-spacing:0.08em; text-align:left; padding: 0 8px;">
+            <span style="color:#005515;">[00:00:00]</span> <span style="color:#00ff41;">CONN</span> Secure handshake complete<br>
+            <span style="color:#005515;">[00:00:01]</span> <span style="color:#00ff41;">ENCR</span> AES-256 applied to payload<br>
+            <span style="color:#005515;">[00:00:02]</span> <span style="color:#00ff41;">SEND</span> Routing via TOR — 7 hops<br>
+            <span style="color:#005515;">[00:00:03]</span> <span style="color:#00ff41;">RECV</span> Delivered to: <strong style="color:#fff;">${nombre}</strong><br>
+            <span style="color:#005515;">[00:00:04]</span> <span style="color:#ffaa00;">INFO</span> Hello, friend. We'll be in touch.<br>
+            <span style="color:#005515;">[00:00:05]</span> <span style="color:#ff2200;">WIPE</span> Clearing session data...<br>
+            <span style="color:#005515;">[00:00:06]</span> <span style="color:#00ff41;">DONE</span> <span style="color:#00ff41; text-shadow:0 0 8px #00ff41;">You are not alone.</span>
+          </div>`,
+        confirmButtonText: '> CLOSE_SESSION',
+        customClass: { popup: 'swal-fsociety', confirmButton: 'swal-btn-fsociety swal-btn-success' },
+        backdrop: 'rgba(0,0,0,0.92)',
+        iconHtml: '<span style="font-size:2.5rem; text-shadow:0 0 20px #00ff41; animation: none;">✓</span>',
+        iconColor: '#00ff41',
+        timer: 8000,
+        timerProgressBar: true,
+        showConfirmButton: true,
+      }).then(() => {
+        document.getElementById('contactForm').reset();
+        updateProgress();
+      });
+    }, 2200);
+
+  });
+</script>
+
+<style>
+  /* SWEETALERT OVERRIDES */
+  .swal-fsociety {
+    border: 1px solid rgba(0,255,65,0.2) !important;
+    border-left: 3px solid #00ff41 !important;
+    border-radius: 0 !important;
+    box-shadow:
+      0 0 40px rgba(0,255,65,0.15),
+      0 0 80px rgba(0,0,0,0.9) !important;
+    font-family: 'Share Tech Mono', monospace !important;
+  }
+
+  .swal2-icon {
+    border-color: rgba(0,255,65,0.3) !important;
+    margin: 20px auto 10px !important;
+  }
+
+  .swal-btn-fsociety {
+    font-family: 'Share Tech Mono', monospace !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.25em !important;
+    border-radius: 0 !important;
+    padding: 12px 28px !important;
+    border: 1px solid !important;
+    background: transparent !important;
+    transition: all 0.3s !important;
+    cursor: none !important;
+  }
+
+  .swal-btn-success {
+    color: #00ff41 !important;
+    border-color: #00ff41 !important;
+    text-shadow: 0 0 8px #00ff41 !important;
+  }
+  .swal-btn-success:hover {
+    background: rgba(0,255,65,0.1) !important;
+    box-shadow: 0 0 20px rgba(0,255,65,0.3) !important;
+  }
+  .swal-btn-error {
+    color: #ff2200 !important;
+    border-color: #ff2200 !important;
+    text-shadow: 0 0 8px #ff2200 !important;
+  }
+  .swal-btn-error:hover {
+    background: rgba(255,34,0,0.1) !important;
+    box-shadow: 0 0 20px rgba(255,34,0,0.3) !important;
+  }
+  .swal-btn-warn {
+    color: #ffaa00 !important;
+    border-color: #ffaa00 !important;
+    text-shadow: 0 0 8px #ffaa00 !important;
+  }
+  .swal-btn-warn:hover {
+    background: rgba(255,170,0,0.1) !important;
+  }
+
+  .swal2-timer-progress-bar {
+    background: linear-gradient(90deg, #003a10, #00ff41) !important;
+    height: 3px !important;
+  }
+
+  .swal2-html-container {
+    font-family: 'Share Tech Mono', monospace !important;
+    margin-top: 8px !important;
+  }
+
+  .swal2-confirm:focus { box-shadow: none !important; }
+</style>
+
+</body>
+</html>
